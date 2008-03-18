@@ -17,14 +17,14 @@ def sqla_run_tests(test_labels, verbosity=1, interactive=True, extra_tests=[]):
     testfiles = []
     if test_labels:
         for label in test_labels:
-            fname = join(dirname(__file__), "regression", label)
+            fname = join(dirname(__file__), label)
             testfiles.append(fname)
     else:
         from glob import glob
-        dirs = glob(join(dirname(__name__), "regression/*.test"))
-        dirs = [join(dirname(__name__), bname) for bname in map(basename, dirs)]
+        dirs = glob(join(dirname(__file__), "regression/*.test"))
         for test_file in dirs:
             testfiles.append(test_file)
+    testfiles  = [join(dirname(__file__), bname) for bname in map(basename, testfiles)]
 
     import doctest
     total_fails = 0

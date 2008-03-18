@@ -1,17 +1,49 @@
 >>> from regression.norelations.models import Person
 >>> from django.core.management import call_command
 >>> call_command("syncdb")
+2008... 17:09:10,095 INFO sqlalchemy.engine.base.Engine.0x... PRAGMA table_info("norelations_person")
+2008... 17:09:10,096 INFO sqlalchemy.engine.base.Engine.0x... {}
+2008... 17:09:10,098 INFO sqlalchemy.engine.base.Engine.0x... 
+CREATE TABLE norelations_person(
+    id INTEGER NOT NULL,
+    last_name VARCHAR(32) NOT NULL,
+    first_name VARCHAR(32) NOT NULL,
+    PRIMARY KEY (id)
+)
+2008... INFO sqlalchemy.engine.base.Engine.0x... {}
+2008... INFO sqlalchemy.engine.base.Engine.0x... COMMIT
 >>> p = Person()
 >>> p.save()
+2008... INFO sqlalchemy.engine.base.Engine.0x... BEGIN
+2008... INFO sqlalchemy.engine.base.Engine.0x... INSERT INTO norelations_person (last_name, first_name) VALUES (?, ?)
+2008... INFO sqlalchemy.engine.base.Engine.0x... ['', '']
+2008... INFO sqlalchemy.engine.base.Engine.0x... COMMIT
 >>> Person.query.all()
+2008... INFO sqlalchemy.engine.base.Engine.0x... SELECT norelations_person.id AS norelations_person_id, norelations_person.last_name AS norelations_person_last_name, norelations_person.first_name AS norelations_person_first_name 
+FROM norelations_person ORDER BY norelations_person.oid
+2008... INFO sqlalchemy.engine.base.Engine.0x... []
 [<Person: Person object>]
->>> # Be thankful you were not named '2'.
 >>> p2 = Person.objects.create(first_name="2", last_name="sadf")
+2008... INFO sqlalchemy.engine.base.Engine.0x... BEGIN
+2008... INFO sqlalchemy.engine.base.Engine.0x... INSERT INTO norelations_person (last_name, first_name) VALUES (?, ?)
+2008... INFO sqlalchemy.engine.base.Engine.0x... ['sadf', '2']
+2008... INFO sqlalchemy.engine.base.Engine.0x... COMMIT
 >>> Person.query.all()
+2008... INFO sqlalchemy.engine.base.Engine.0x... SELECT norelations_person.id AS norelations_person_id, norelations_person.last_name AS norelations_person_last_name, norelations_person.first_name AS norelations_person_first_name 
+FROM norelations_person ORDER BY norelations_person.oid
+2008... INFO sqlalchemy.engine.base.Engine.0x... []
 [<Person: Person object>, <Person: Person object>]
 >>> Person.objects.filter(first_name__contains="2")
+2008... INFO sqlalchemy.engine.base.Engine.0x... SELECT norelations_person.id AS norelations_person_id, norelations_person.last_name AS norelations_person_last_name, norelations_person.first_name AS norelations_person_first_name
+FROM norelations_person 
+WHERE norelations_person.first_name LIKE ? ORDER BY norelations_person.oid
+2008... INFO sqlalchemy.engine.base.Engine.0x... ['%2%']
 [<Person: Person object>]
 >>> Person.query.filter_by(first_name=2).all()
+2008... INFO sqlalchemy.engine.base.Engine.0x... SELECT norelations_person.id AS norelations_person_id, norelations_person.last_name AS norelations_person_last_name, norelations_person.first_name AS norelations_person_first_name 
+FROM norelations_person 
+WHERE norelations_person.first_name = ? ORDER BY norelations_person.oid
+2008... INFO sqlalchemy.engine.base.Engine.0x... [2]
 [<Person: Person object>]
 
 
