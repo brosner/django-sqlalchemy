@@ -26,7 +26,7 @@ def sqla_run_tests(test_labels, verbosity=1, interactive=True, extra_tests=[]):
     total_fails = 0
     for fname in testfiles:
         fails, tests = doctest.testfile(
-            fname, package="regression",
+            basename(fname), package="regression",
             optionflags=doctest.ELLIPSIS|doctest.NORMALIZE_WHITESPACE)
         total_fails += fails
     return total_fails
