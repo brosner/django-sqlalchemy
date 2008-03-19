@@ -146,8 +146,11 @@ class Model(models.Model):
         Save the current instance. We force a flush so it mimics Django's 
         behavior.
         """
-        obj = session.save(self)
-        session.commit()
+        if self.pk is None:
+            obj = session.save(self)
+            session.commit()
+        else:
+            obj = self.update()
         return obj
     
     def update(self, *args, **kwargs):
