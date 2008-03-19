@@ -388,5 +388,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     ops = DatabaseOperations()
     
     def _cursor(self, settings):
-        return session.connection().connection.cursor()
+        from sqlalchemy.databases.sqlite import SQLiteDialect
+        conn = session.connection()
+        kwargs = {}
+        if isinstance(conn.engine.dialect, SQLiteDialect,):
+            from django.db.backends.sqlite3.base import SQLiteCursorWrapper
+            kwargs['factory'] = SQLiteCursorWrapper
+        return conn.connection.cursor(**kwargs)
 
