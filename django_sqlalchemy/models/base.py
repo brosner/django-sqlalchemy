@@ -1,10 +1,10 @@
 
-from django_sqlalchemy.backend.base import metadata, Session
+from django_sqlalchemy.backend.base import metadata, Session, session
 from django_sqlalchemy.models import *
 from django.db import models
 from sqlalchemy import *
 from sqlalchemy.schema import Table, SchemaItem, Column, MetaData
-from sqlalchemy.orm import synonym as _orm_synonym, mapper, relation, sessionmaker, scoped_session
+from sqlalchemy.orm import synonym as _orm_synonym, mapper, relation
 from sqlalchemy.orm.interfaces import MapperProperty
 from sqlalchemy.orm.properties import PropertyLoader
 
@@ -140,3 +140,28 @@ class Model(models.Model):
                                 (k, type(self).__name__))
             setattr(self, k, kwargs[k])
         return super(Model, self).__init__(**kwargs)
+    
+    def save(self):
+        """
+        Save the current instance. We force a flush so it mimics Django's 
+        behavior.
+        """
+        obj = session.save(self)
+        session.flush()
+        return obj
+    
+    def update(self, *args, **kwargs):
+        """
+        Updates direct against the database
+        """
+        obj = session.update(self, *args, **kwargs)
+        session.flush()
+        return obj
+        
+    def delete(self):
+        """
+        Deletes the current instance
+        """
+        obj = session.delete(self)
+        session.flush()
+        return obj

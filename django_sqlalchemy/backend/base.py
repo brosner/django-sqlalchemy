@@ -371,10 +371,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 the InsertQuery class and is how Model.save() is implemented. It is not
                 part of the public API of QuerySet, though.
                 """
-                self._result_cache = None
-                query = self.query.clone(sql.InsertQuery)
-                query.insert_values(kwargs, _raw_values)
-                return query.execute_sql(_return_id)
+                print "howdy"
             _insert.alters_data = True
         return SqlAlchemyQuerySet
 
