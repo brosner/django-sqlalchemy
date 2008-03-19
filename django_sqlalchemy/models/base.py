@@ -91,7 +91,6 @@ class ModelBase(models.base.ModelBase):
         
         # finally we add the SA Mapper declaration, if we haven't been 
         if not hasattr(cls, "__mapper__"):
-            # 
             cls.__mapper__ = mapper(cls, table, inherits=inherits, properties=dict([(f.name, f) for f in our_stuff]), **mapper_args)
         # add the SA Query class onto our model class for easy querying
         cls.query = Session.query_property()
