@@ -13,7 +13,8 @@ except ImportError, e:
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI)
-Session = scoped_session(sessionmaker(bind=engine, autoflush=True, transactional=True))
+Session = scoped_session(sessionmaker(
+    bind=engine, transactional=True))
 session = Session()
 
 # default metadata

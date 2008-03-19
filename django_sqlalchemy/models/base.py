@@ -147,7 +147,7 @@ class Model(models.Model):
         behavior.
         """
         obj = session.save(self)
-        session.flush()
+        session.commit()
         return obj
     
     def update(self, *args, **kwargs):
@@ -155,7 +155,7 @@ class Model(models.Model):
         Updates direct against the database
         """
         obj = session.update(self, *args, **kwargs)
-        session.flush()
+        session.commit()
         return obj
         
     def delete(self):
@@ -163,5 +163,5 @@ class Model(models.Model):
         Deletes the current instance
         """
         obj = session.delete(self)
-        session.flush()
+        session.commit()
         return obj
