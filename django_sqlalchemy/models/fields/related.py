@@ -43,7 +43,9 @@ class ManyToManyField(models.ManyToManyField):
                 # correct type here. A foreign key would be nice too.
                 sa.Column(local_m2m_col, sa.Integer, ),
                 sa.Column(remote_m2m_col, sa.Integer, ),)
-            joining_table.create(metadata.bind)
+            # We don't actually want to create it, but this is how
+            # you'd do it.
+            #joining_table.create(metadata.bind)
         # Now, what I don't get is why this path being called more
         # than once for the same tbl_name.
         

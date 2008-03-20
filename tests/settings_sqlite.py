@@ -3,8 +3,9 @@ DEBUG = TEMPLATE_DEBUG = True
 
 DATABASE_ENGINE = 'django_sqlalchemy'
 DATABASE_NAME = ''
-DJANGO_SQLALCHEMY_DBURI = "sqlite:///testing.db"
-DJANGO_SQLALCHEMY_ECHO = False
+TESTING_SQLITE_NAME = "testing.db"
+DJANGO_SQLALCHEMY_DBURI = "sqlite:///"+TESTING_SQLITE_NAME
+DJANGO_SQLALCHEMY_ECHO = True
 
 INSTALLED_APPS = (
     'django_sqlalchemy',

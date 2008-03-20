@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os, sys
-from os.path import join, dirname, basename, abspath
+from os.path import join, dirname, basename, abspath, exists
 
 def sqla_run_tests(test_labels, verbosity=1, interactive=True, extra_tests=[]):
     # Again, mostly copies form django.test.simple.run_tests.
@@ -36,6 +36,8 @@ def django_sqlalchemy_tests(verbosity, test_labels):
     from django.conf import settings
     settings.SITE_ID = 1
     settings.USE_I18N = True
+    if exists(settings.TESTING_SQLITE_NAME):
+        os.remove(settings.TESTING_SQLITE_NAME)
 
     failures = sqla_run_tests(test_labels, verbosity=verbosity, interactive=False, )
     if failures:

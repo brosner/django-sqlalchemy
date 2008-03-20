@@ -15,7 +15,6 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI)
 Session = scoped_session(sessionmaker(
     bind=engine, transactional=True))
-session = Session()
 
 # default metadata
 metadata = MetaData(bind=engine)
@@ -389,7 +388,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     
     def _cursor(self, settings):
         from sqlalchemy.databases.sqlite import SQLiteDialect
-        conn = session.connection()
+        conn = Session.connection()
         kwargs = {}
         if isinstance(conn.engine.dialect, SQLiteDialect,):
             from django.db.backends.sqlite3.base import SQLiteCursorWrapper
