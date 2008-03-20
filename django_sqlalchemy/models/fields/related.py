@@ -9,12 +9,11 @@ class ForeignKey(models.ForeignKey):
     
     def create_column(self):
         # ForeignKey will be shadowed by the class inside of this method.
-        from sqlalchemy import ForeignKey as safk
         fk_primary = list(self.rel.to.__table__.primary_key)[0]
         self.column = sa.Column('%s_%s' % (
             self.rel.to._meta.object_name.lower(),
             self.rel.to._meta.pk.name), 
-                             fk_primary.type, safk(fk_primary))
+                             fk_primary.type, sa.ForeignKey(fk_primary))
         return self.column
 
 class ManyToManyField(models.ManyToManyField):
