@@ -33,19 +33,19 @@ def lookup_query_expression(lookup_type, field, value):
     elif lookup_type == 'iendswith':
         return curry(field.ilike, '%%%s' % value)
     elif lookup_type == 'range':
-        raise NotImplemented()
+        raise NotImplementedError()
     elif lookup_type == 'year':        
-        raise NotImplemented()
+        raise NotImplementedError()
     elif lookup_type == 'month':
-        raise NotImplemented()
+        raise NotImplementedError()
     elif lookup_type == 'day':
-        raise NotImplemented()
+        raise NotImplementedError()
     elif lookup_type == 'search':
-        raise NotImplemented()
+        raise NotImplementedError()
     elif lookup_type == 'regex':
-        raise NotImplemented()
+        raise NotImplementedError()
     elif lookup_type == 'iregex':
-        raise NotImplemented()
+        raise NotImplementedError()
     elif lookup_type == 'isnull': 
         if value:
             return curry(operator.eq, field, None)
