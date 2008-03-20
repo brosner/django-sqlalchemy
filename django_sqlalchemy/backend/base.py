@@ -1,7 +1,5 @@
-
 from django.conf import settings
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseOperations, util
-# from django_sqlalchemy.backend.query import QuerySetMixin
 
 try:
     from sqlalchemy import create_engine, MetaData
