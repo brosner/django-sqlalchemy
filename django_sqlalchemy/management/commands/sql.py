@@ -1,13 +1,15 @@
 
 from cStringIO import StringIO
 from sqlalchemy import create_engine
-from django_sqlalchemy.backend import metadata
 from django.core.management.base import AppCommand, CommandError
 from django.conf import settings
 from django.db.models.loading import get_models
 
 class Command(AppCommand):
     def handle_app(self, app, **options):
+        # TODO: figure why this import *has* to be here. it is probably a
+        # python related thing i don't fully understand yet.
+        from django_sqlalchemy.backend import metadata
         buf = StringIO()
         def buffer_output(s, p=""):
             return buf.write(s + p)
