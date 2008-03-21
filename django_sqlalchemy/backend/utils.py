@@ -4,6 +4,7 @@ from django.db.models.sql.constants import *
 from django.core.exceptions import FieldError
 from django.db.models.sql.constants import QUERY_TERMS
 from django.utils.functional import curry
+from django.utils.encoding import smart_unicode, force_unicode
 
 QUERY_TERMS_MAPPING = {
     'exact': operator.eq, 
@@ -81,8 +82,7 @@ def parse_filter(queryset, exclude, **kwargs):
             value = value()
         
         field = reduce(lambda x, y: getattr(x, y), parts)
-    
-        op = lookup_query_expression(lookup_type, field, value)
+        op = lookup_query_expression(lookup_type, field, smart_unicode(value, strings_only=True))
         expression = op()
         
         if exclude:

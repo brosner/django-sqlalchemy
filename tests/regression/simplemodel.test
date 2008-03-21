@@ -11,7 +11,7 @@
 [<Person: Person object>, <Person: Person object>]
 >>> Person.objects.filter(first_name__contains="2")
 [<Person: Person object>]
->>> Person.query.filter_by(first_name=2).all()
+>>> Person.query.filter_by(first_name="2").all()
 [<Person: Person object>]
 
 
