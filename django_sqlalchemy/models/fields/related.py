@@ -34,7 +34,6 @@ class ManyToManyField(models.ManyToManyField):
             # In which case, we create it. 
             local_m2m_col = self.m2m_column_name()
             remote_m2m_col = self.m2m_reverse_name()
-            import sqlalchemy as sa
             joining_table = sa.Table(
                 tbl_name, metadata,
                 # HACKity hackity hack hack hack, we need to use the
