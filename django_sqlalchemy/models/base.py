@@ -41,8 +41,9 @@ class ModelBase(models.base.ModelBase):
         cls._decl_class_registry[classname] = cls
         our_stuff = []
         
-        # we need to check if we've already created the AutoField. 
-        # AutoField here represents the dj-sa AutoField not Django's
+        # Django will *always* have set the pk before we get here. Check if
+        # it is a Django AutoField so we can override it with our own. This
+        # will allow for a custom primary key to just work.
         if isinstance(cls._meta.pk, models.AutoField):
             # we need to add in the django-sqlalchemy version of the AutoField
             # because the one that Django adds will not work for our purposes.
