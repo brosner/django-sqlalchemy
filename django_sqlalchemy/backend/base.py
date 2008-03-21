@@ -32,7 +32,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         return metadata.bind.dialect.identifier_preparer.quote_identifier(name)
     
     def query_set_class(self, DefaultQuerySet):
-        from django_sqlalchemy.backend.utils import parse_filter
+        from django.db.models.sql.constants import ORDER_PATTERN
+        from django_sqlalchemy.backend import utils
         
         class SqlAlchemyQuerySet(DefaultQuerySet):
             """
@@ -136,7 +137,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 """
                 latest_by = field_name or self.model._meta.get_latest_by
                 assert bool(latest_by), "latest() requires either a field_name parameter or 'get_latest_by' in the model"
-                return self.query.order_by('-%s' % latest_by).one()
+                return self.query.order_by('-%s' % latest_by).first()
 
             def in_bulk(self, id_list):
                 """
@@ -241,7 +242,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 return self._filter_or_exclude(True, *args, **kwargs)
 
             def _filter_or_exclude(self, exclude, *args, **kwargs):
-                return parse_filter(self, exclude, **kwargs)
+                return utils.parse_filter(self, exclude, **kwargs)
 
             def complex_filter(self, filter_obj):
                 """
@@ -284,29 +285,23 @@ class DatabaseOperations(BaseDatabaseOperations):
 
             def order_by(self, *field_names):
                 """
-                TODO:need to map
                 Returns a new QuerySet instance with the ordering changed.
+                These items are either field names (not column names) --
+                possibly with a direction prefix ('-' or '?') -- or ordinals,
+                corresponding to column positions in the 'select' list.
                 """
-                for order in field_names:
-                    desc = False
-                    if order[0] == "-":
-                        desc = True
-                        order = order[1:]
-                    if "." in order:
-                        table, field = order.split(".")
-                        # rel_name = cls.DjangoAlchemy._related_objects[table_model[table]]
-                        # o = getattr(table_model[table].DjangoAlchemy.c, field)
-                        query = query.join(rel_name)
-                    else:
-                        o = getattr(self.model.c, order)
-
-                    if desc:
-                        from sqlalchemy import desc
-                        query = query.order_by(desc(o))
-                    else:
-                        query = query.order_by(o)        
-                return query
-
+                obj = self._clone()
+                # django likes to clear the ordering, not sure why, because
+                # this is inconsistent with the filter approach
+                obj.query._order_by = False
+                errors = []
+                for item in field_names:
+                    if not ORDER_PATTERN.match(item):
+                        errors.append(item)
+                if errors:
+                    raise FieldError('Invalid order_by arguments: %s' % errors)
+                return utils.parse_order_by(obj, *field_names)
+                
             def distinct(self, true_or_false=True):
                 """
                 Returns a new QuerySet instance that will select only distinct results.

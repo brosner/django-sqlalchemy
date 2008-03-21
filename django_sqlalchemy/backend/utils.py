@@ -5,6 +5,8 @@ from django.core.exceptions import FieldError
 from django.db.models.sql.constants import QUERY_TERMS
 from django.utils.functional import curry
 from django.utils.encoding import smart_unicode, force_unicode
+from sqlalchemy.sql import func, desc, asc
+
 
 QUERY_TERMS_MAPPING = {
     'exact': operator.eq, 
@@ -89,3 +91,39 @@ def parse_filter(queryset, exclude, **kwargs):
             expression = ~(expression)
         query.query = query.query.filter(expression)
     return query
+
+def parse_order_by(queryset, *field_names):
+    """
+    TODO:add support for related fields
+    Parse the order_by clause and return the modified query. 
+    This does not consider related tables at this time.
+    """
+    for field in field_names:
+        if field == '?':
+            queryset.query = queryset.query.order_by(func.random())
+            continue
+        if isinstance(field, int):
+            if field < 0:
+                order = desc
+                field = -field
+            else:
+                order = asc
+            queryset.query = queryset.query.order_by(order(field))
+            continue
+        # evaluate the descending condition
+        if '-' in field:
+            order = desc
+            field = field[1:]
+        else:
+            order = asc
+        # old school django style for related fields
+        if '.' in field:
+            #TODO: this is not accurate
+            queryset.query = queryset.query.order_by(order(condition))
+        else:
+            # normal order by
+            #TODO: handle the join situation
+            parts = [queryset.model] + field.split(LOOKUP_SEP)            
+            condition = reduce(lambda x, y: getattr(x, y), parts)        
+            queryset.query = queryset.query.order_by(order(condition))
+    return queryset
