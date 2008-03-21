@@ -60,20 +60,12 @@ class ModelBase(models.base.ModelBase):
             for i, field in enumerate(cls._meta.fields):
                 if isinstance(field, models.AutoField):
                     cls._meta.fields[i] = auto
-            # now we can append the AutoField into our_stuff which gets
-            # used in the SA Table declaration
-            our_stuff.append(auto.create_column())
         for field in cls._meta.fields + cls._meta.many_to_many:
-            from django_sqlalchemy.models.fields.related import ForeignKey, ManyToManyField
-            # Field and ForeignKey here are our implementations of
-            # those fields.  It's specifically done that way to ignore
-            # things like Django's AutoField.
-            if isinstance(field, (Field, ForeignKey, ManyToManyField)):
-                sa_field = field.create_column()
-                # A ManyToManyField will return None for the column as it does
-                # not need a column.
-                if sa_field is not None:
-                    our_stuff.append(sa_field)
+            sa_field = field.create_column()
+            # A ManyToManyField will return None for the column as it does
+            # not need a column.
+            if sa_field is not None:
+                our_stuff.append(sa_field)
         
         # SA supports autoloading the model from database, but that will
         # not work for Django. We're leaving this here just for future
