@@ -91,7 +91,14 @@ class DatabaseOperations(BaseDatabaseOperations):
                 Performs the query and returns a single object matching the given
                 keyword arguments.
                 """
-                return self.filter(*args, **kwargs).one()
+                return self.filter(*args, **kwargs).query.one()
+
+            def first(self):
+                """
+                Return the first result of the underlying ``Query`` or None if the result doesn't contain any row.
+                This results in an execution of the underlying query.
+                """
+                return self.query.first()
 
             def create(self, **kwargs):
                 """
