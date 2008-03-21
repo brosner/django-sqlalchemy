@@ -12,6 +12,7 @@ class Command(NoArgsCommand):
     help = "Create the database tables for all apps in INSTALLED_APPS whose tables haven't already been created."
     
     def handle_noargs(self, **options):
+        from django_sqlalchemy.backend import metadata, Session
         metadata.create_all()
         Session.commit()
         

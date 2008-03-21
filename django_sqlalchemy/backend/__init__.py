@@ -1,2 +1,2 @@
 
-from base import engine, Session, metadata, session
+from base import engine, Session, metadata
