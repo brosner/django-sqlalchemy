@@ -137,7 +137,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 """
                 latest_by = field_name or self.model._meta.get_latest_by
                 assert bool(latest_by), "latest() requires either a field_name parameter or 'get_latest_by' in the model"
-                return self.query.order_by('-%s' % latest_by).first()
+                return self.order_by('-%s' % latest_by).first()
 
             def in_bulk(self, id_list):
                 """
