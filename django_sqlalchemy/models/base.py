@@ -43,13 +43,22 @@ class ModelBase(models.base.ModelBase):
         
         # we need to check if we've already created the AutoField. 
         # AutoField here represents the dj-sa AutoField not Django's
-        if not isinstance(cls._meta.pk, AutoField):
+        if isinstance(cls._meta.pk, models.AutoField):
             # we need to add in the django-sqlalchemy version of the AutoField
             # because the one that Django adds will not work for our purposes.
             auto = AutoField(verbose_name='ID', primary_key=True, auto_created=True)
             # this might seem redundant but without it the name is not set 
             # for SA
             auto.name = "id"
+            # Call set_attributes_from_name as it normally only gets called
+            # during Django's metaclass.
+            auto.set_attributes_from_name(auto.name)
+            # HACK: we need to force the use of our AutoField over Django's
+            # AutoField.
+            cls._meta.pk = auto
+            for i, field in enumerate(cls._meta.fields):
+                if isinstance(field, models.AutoField):
+                    cls._meta.fields[i] = auto
             # now we can append the AutoField into our_stuff which gets
             # used in the SA Table declaration
             our_stuff.append(auto.create_column())

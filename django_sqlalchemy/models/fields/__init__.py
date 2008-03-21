@@ -9,11 +9,12 @@ from sqlalchemy.types import *
 class Field(models.Field):
     
     def __init__(self, *args, **kwargs):
-        self.column = None        
+        self.sa_column = None
         models.Field.__init__(self, **kwargs)
     
     def create_column(self):
         # create the base kwargs dict for sa
+        # TODO: move to sa_column_kwargs?
         kwargs = dict(nullable=self.null,
                       index=self.db_index, 
                       unique=self.unique)
@@ -22,10 +23,10 @@ class Field(models.Field):
             kwargs["default"] = self.default
         # dump in field specific kwargs and overrides
         kwargs.update(self.sa_column_kwargs())
-        self.column = Column(self.name, self.sa_column_type(), 
+        self.sa_column = Column(self.name, self.sa_column_type(), 
                 *self.sa_column_args(),
                 **kwargs)
-        return self.column
+        return self.sa_column
         
     def sa_column_type(self):
         raise NotImplementedError
@@ -34,7 +35,10 @@ class Field(models.Field):
         return tuple()
     
     def sa_column_kwargs(self):
-        return dict()
+        kwargs = {}
+        if self.primary_key:
+            kwargs["primary_key"] = True
+        return kwargs
        
 class AutoField(models.AutoField, Field):
     def __init__(self, *args, **kwargs):

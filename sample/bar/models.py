@@ -2,9 +2,9 @@
 from django_sqlalchemy import models
 
 class Tag(models.Model):
-    tag = models.CharField(max_length=10)
+    tag = models.CharField(max_length=10, primary_key=True)
 
 class Product(models.Model):
-    name = models.CharField(max_length=18)
+    name = models.CharField(max_length=18, primary_key=True)
     tags = models.ManyToManyField(Tag)
     
