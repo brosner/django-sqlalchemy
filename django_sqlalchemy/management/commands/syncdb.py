@@ -1,6 +1,6 @@
 from optparse import make_option
 from django.core.management.base import NoArgsCommand
-from django_sqlalchemy.backend.base import metadata
+from django_sqlalchemy.backend import metadata
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (

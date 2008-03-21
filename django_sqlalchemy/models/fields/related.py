@@ -1,6 +1,8 @@
-from django.db import models
-import sqlalchemy as sa
 
+from django.db import models
+from django_sqlalchemy.backend import metadata, Session
+
+import sqlalchemy as sa
 
 class ForeignKey(models.ForeignKey):
     def __init__(self, to, *args, **kwargs):
@@ -22,13 +24,9 @@ class ManyToManyField(models.ManyToManyField):
 
     def add(self, *args, **kwargs):
         super(self.__class__, self).add(self, *args, **kwargs)
-        from django_sqlalchemy.backend.base import Session
         Session.commit()
-            
-            
-        
+    
     def contribute_to_class(self, cls, related):
-        from django_sqlalchemy.backend.base import metadata
         super(self.__class__, self).contribute_to_class(cls, related)
         tbl_name = self.m2m_db_table()
         # Apparently, inclusion in metadata checks for table names. 
