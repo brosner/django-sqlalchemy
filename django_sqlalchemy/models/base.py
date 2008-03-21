@@ -150,8 +150,8 @@ class Model(models.Model):
         behavior.
         """
         if self.pk is None:
-            obj = session.save(self)
-            session.commit()
+            obj = Session.save(self)
+            Session.commit()
         else:
             obj = self.update()
         return obj
@@ -160,14 +160,14 @@ class Model(models.Model):
         """
         Updates direct against the database
         """
-        obj = session.update(self, *args, **kwargs)
-        session.commit()
+        obj = Session.update(self, *args, **kwargs)
+        Session.commit()
         return obj
         
     def delete(self):
         """
         Deletes the current instance
         """
-        obj = session.delete(self)
-        session.commit()
+        obj = Session.delete(self)
+        Session.commit()
         return obj

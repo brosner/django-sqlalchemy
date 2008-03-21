@@ -12,7 +12,6 @@ class Command(NoArgsCommand):
     help = "Create the database tables for all apps in INSTALLED_APPS whose tables haven't already been created."
     
     def handle_noargs(self, **options):
-        # TODO: figure why this import *has* to be here. it is probably a
-        # python related thing i don't fully understand yet.
-        from django_sqlalchemy.backend import metadata
         metadata.create_all()
+        Session.commit()
+        
