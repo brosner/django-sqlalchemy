@@ -16,6 +16,11 @@ class Command(AppCommand):
         engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI,
             strategy="mock",
             executor=buffer_output)
-        metadata.create_all(engine,
-            tables=[m.__table__ for m in get_models(app)])
+        tables = []
+        for model in get_models(app):
+            tables.append(model.__table__)
+            tables.extend([f.__table__ for f in model._meta.local_many_to_many])
+        metadata.create_all(engine, tables=tables)
+        # the sql printed may *not* be the exact sql SQLAlchemy uses. i bet
+        # it is pretty close.
         print buf.getvalue()

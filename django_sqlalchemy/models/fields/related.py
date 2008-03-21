@@ -29,21 +29,14 @@ class ManyToManyField(models.ManyToManyField):
     def contribute_to_class(self, cls, related):
         super(self.__class__, self).contribute_to_class(cls, related)
         tbl_name = self.m2m_db_table()
-        # Apparently, inclusion in metadata checks for table names. 
-        if not tbl_name in metadata:
-            # In which case, we create it. 
-            local_m2m_col = self.m2m_column_name()
-            remote_m2m_col = self.m2m_reverse_name()
-            joining_table = sa.Table(
-                tbl_name, metadata,
-                # HACKity hackity hack hack hack, we need to use the
-                # correct type here. A foreign key would be nice too.
-                sa.Column(local_m2m_col, sa.Integer, ),
-                sa.Column(remote_m2m_col, sa.Integer, ),)
-            joining_table.create(metadata.bind)
-        # Now, what I don't get is why this path being called more
-        # than once for the same tbl_name.
-        
+        local_m2m_col = self.m2m_column_name()
+        remote_m2m_col = self.m2m_reverse_name()
+        self.__table__ = sa.Table(tbl_name, metadata,
+            # HACKity hackity hack hack hack, we need to use the
+            # correct type here. A foreign key would be nice too.
+            sa.Column(local_m2m_col, sa.Integer),
+            sa.Column(remote_m2m_col, sa.Integer) )
+        return None
             
                    
                    
