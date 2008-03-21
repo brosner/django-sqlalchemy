@@ -70,6 +70,8 @@ class ModelBase(models.base.ModelBase):
             # things like Django's AutoField.
             if isinstance(field, (Field, ForeignKey, ManyToManyField)):
                 sa_field = field.create_column()
+                # A ManyToManyField will return None for the column as it does
+                # not need a column.
                 if sa_field is not None:
                     our_stuff.append(sa_field)
         
