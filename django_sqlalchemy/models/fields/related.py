@@ -1,6 +1,7 @@
 
 from django.db import models
 from django_sqlalchemy.backend import metadata, Session
+from django_sqlalchemy.models import Field
 
 import sqlalchemy as sa
 
@@ -18,7 +19,7 @@ class ForeignKey(models.ForeignKey):
                              fk_primary.type, sa.ForeignKey(fk_primary))
         return self.column
 
-class ManyToManyField(models.ManyToManyField):
+class ManyToManyField(models.ManyToManyField, Field):
     def __init__(self, to, *args, **kwargs):
         super(self.__class__, self).__init__(to, *args, **kwargs)
 
@@ -26,18 +27,12 @@ class ManyToManyField(models.ManyToManyField):
         super(self.__class__, self).add(self, *args, **kwargs)
         Session.commit()
     
-    def contribute_to_class(self, cls, related):
-        super(self.__class__, self).contribute_to_class(cls, related)
-        tbl_name = self.m2m_db_table()
-        local_m2m_col = self.m2m_column_name()
-        remote_m2m_col = self.m2m_reverse_name()
-        self.__table__ = sa.Table(tbl_name, metadata,
-            # HACKity hackity hack hack hack, we need to use the
-            # correct type here. A foreign key would be nice too.
-            sa.Column(local_m2m_col, sa.Integer),
-            sa.Column(remote_m2m_col, sa.Integer) )
-        return None
-            
-                   
-                   
-        
+    def create_column(self):
+        # m2m fields do not have a column
+        self.column = None
+        self.__table__ = sa.Table(self.m2m_db_table(), metadata,
+            # HACK: need to get the correct datatypes here.
+            sa.Column(self.m2m_column_name(), sa.Integer),
+            sa.Column(self.m2m_reverse_name(), sa.Integer))
+        return self.column
+    
