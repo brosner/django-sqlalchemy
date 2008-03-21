@@ -1,7 +1,7 @@
 
 DEBUG = TEMPLATE_DEBUG = True
 
-DATABASE_ENGINE = 'django_sqlalchemy'
+DATABASE_ENGINE = 'django_sqlalchemy.backend'
 DATABASE_NAME = ''
 DJANGO_SQLALCHEMY_DBURI = "sqlite:///testing.db"
 DJANGO_SQLALCHEMY_ECHO = False
