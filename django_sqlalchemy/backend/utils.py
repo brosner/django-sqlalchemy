@@ -4,7 +4,6 @@ from django.db.models.sql.constants import *
 from django.core.exceptions import FieldError
 from django.db.models.sql.constants import QUERY_TERMS
 from django.utils.functional import curry
-from django.utils.encoding import smart_unicode, force_unicode
 from sqlalchemy.sql import func, desc, asc
 
 

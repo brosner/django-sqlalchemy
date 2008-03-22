@@ -1,3 +1,5 @@
+WARNING: IGNORE THIS OR DECIPHER IT, IT'S DATED.
+
 Here's a sample shell to see how to get going
 
 # this is with no database present

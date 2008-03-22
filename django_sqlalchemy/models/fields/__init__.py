@@ -67,7 +67,7 @@ class CharField(models.CharField, Field):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
-        return Unicode(length=self.max_length)
+        return String(length=self.max_length)
         
 class CommaSeparatedIntegerField(models.CommaSeparatedIntegerField, CharField):
     def __init__(self, *args, **kwargs):
@@ -121,7 +121,7 @@ class FileField(models.FileField, Field):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
-        return Unicode(length=self.max_length)
+        return String(length=self.max_length)
 
 class FilePathField(models.FilePathField, Field):
     def __init__(self, *args, **kwargs):
@@ -133,7 +133,7 @@ class FilePathField(models.FilePathField, Field):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
-        return Unicode(length=self.max_length)
+        return String(length=self.max_length)
 
 class FloatField(models.FloatField, Field):
     def __init__(self, *args, **kwargs):
@@ -162,7 +162,7 @@ class IPAddressField(models.IPAddressField, Field):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
-        return Unicode(length=self.max_length)
+        return String(length=self.max_length)
 
 class NullBooleanField(models.NullBooleanField, Field):
     def __init__(self, *args, **kwargs):
@@ -181,7 +181,7 @@ class PhoneNumberField(models.PhoneNumberField, IntegerField):
             hacky way of getting around not providing a max_length.  The database backends enforce the
             length as a varchar(20).
         '''
-        return Unicode(length=20)
+        return String(length=20)
 
 class PositiveIntegerField(models.PositiveIntegerField, IntegerField):
     def __init__(self, *args, **kwargs):
@@ -211,7 +211,7 @@ class TextField(models.TextField, Field):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
-        return UnicodeText()
+        return Text()
 
 class TimeField(models.TimeField, Field):
     def __init__(self, *args, **kwargs):
@@ -236,7 +236,7 @@ class USStateField(models.USStateField, Field):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
-        return Unicode(length=2)
+        return String(length=2)
 
 class XMLField(models.XMLField, TextField):
     def __init__(self, *args, **kwargs):

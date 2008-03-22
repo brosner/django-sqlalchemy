@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseOperations, util
-from django.utils.encoding import smart_unicode, force_unicode
 
 try:
     from sqlalchemy import create_engine, MetaData, exceptions
@@ -11,7 +10,11 @@ except ImportError, e:
 
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI)
+# We are implementing all fields as non unicode types.  We are then 
+# converting all strings to unicode in and out of all fields. 
+# This gets rid of the unicode whining and follows Django's approach
+# to unicode handling.
+engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI, convert_unicode=True)
 Session = scoped_session(sessionmaker(
     bind=engine, transactional=True))
 
@@ -106,8 +109,6 @@ class DatabaseOperations(BaseDatabaseOperations):
                 Create a new object with the given kwargs, saving it to the database
                 and returning the created object.
                 """
-                for k, v in kwargs.iteritems():
-                    kwargs[k] = force_unicode(v, strings_only=True)
                 obj = self.model(**kwargs)
                 obj.save()
                 return obj
