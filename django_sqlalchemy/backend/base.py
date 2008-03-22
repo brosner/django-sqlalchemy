@@ -155,9 +155,11 @@ class DatabaseOperations(BaseDatabaseOperations):
                 """
                 Deletes the records in the current QuerySet.
                 """
-                for obj in self.iterator():
-                    Session.delete(obj)
-                Session.commit()
+                # this approach although hackish results in one fewer
+                # query, the select. This is more optimized than
+                # Django's default. Hopefully it won't pressent a
+                # problem.
+                self.model.__table__.delete(self.query.compile()._whereclause).execute()
             delete.alters_data = True
 
             def update(self, **kwargs):
