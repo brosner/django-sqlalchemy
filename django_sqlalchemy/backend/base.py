@@ -155,7 +155,9 @@ class DatabaseOperations(BaseDatabaseOperations):
                 """
                 Deletes the records in the current QuerySet.
                 """
-                self.query.session.delete(self.query)
+                for obj in self.iterator():
+                    Session.delete(obj)
+                Session.commit()
             delete.alters_data = True
 
             def update(self, **kwargs):
