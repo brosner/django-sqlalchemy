@@ -133,7 +133,7 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def update(self, **kwargs):
             """
-            TODO:need to map
+            TODO:need to map update
             Updates all elements in the current QuerySet, setting all the given
             fields to the appropriate values.
             """
@@ -149,7 +149,7 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def values(self, *fields):
             """
-            TODO:need to map
+            TODO:need to map values
             """
             # >>> b = a.from_statement(select([Category.c.name]))
             # >>> print b
@@ -160,7 +160,7 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def valueslist(self, *fields, **kwargs):
             """
-            TODO:need to map
+            TODO:need to map valueslist
             """
             flat = kwargs.pop('flat', False)
             if kwargs:
@@ -173,7 +173,7 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def dates(self, field_name, kind, order='ASC'):
             """
-            TODO:need to map
+            TODO:need to map dates
             Returns a list of datetime objects representing all available dates
             for the given field_name, scoped to 'kind'.
             """
@@ -222,7 +222,7 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def complex_filter(self, filter_obj):
             """
-            TODO:need to map
+            TODO:need to map complex_filter
             Returns a new QuerySet instance with filter_obj added to the filters.
             filter_obj can be a Q object (or anything with an add_to_query()
             method) or a dictionary of keyword lookup arguments.
@@ -237,7 +237,7 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def select_related(self, *fields, **kwargs):
             """
-            TODO:need to map
+            TODO:need to map select_related
             Returns a new QuerySet instance that will select related objects. If
             fields are specified, they must be ForeignKey fields and only those
             related objects are included in the selection.
@@ -289,7 +289,7 @@ def sa_queryset_factory(DefaultQuerySet):
         def extra(self, select=None, where=None, params=None, tables=None,
                 order_by=None):
             """
-            TODO:need to map
+            TODO:need to map extra
             Add extra SQL fragments to the query.
             """
             assert self.query.can_filter(), \
@@ -332,24 +332,4 @@ def sa_queryset_factory(DefaultQuerySet):
                 c._setup_query()
             return c
 
-        def _fill_cache(self, num=None):
-            """
-            Fills the result cache with 'num' more entries (or until the results
-            iterator is exhausted).
-            """
-            if self._iter:
-                try:
-                    for i in range(num or ITER_CHUNK_SIZE):
-                        self._result_cache.append(self._iter.next())
-                except StopIteration:
-                    self._iter = None
-
-        def _insert(self, _return_id=False, _raw_values=False, **kwargs):
-            """
-            Inserts a new record for the given model. This provides an interface to
-            the InsertQuery class and is how Model.save() is implemented. It is not
-            part of the public API of QuerySet, though.
-            """
-            print "howdy"
-        _insert.alters_data = True
     return SQLAlchemyQuerySet
