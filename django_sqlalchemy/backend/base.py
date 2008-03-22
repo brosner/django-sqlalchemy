@@ -3,7 +3,7 @@ from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDa
 from django.utils.encoding import smart_unicode, force_unicode
 
 try:
-    from sqlalchemy import create_engine, MetaData
+    from sqlalchemy import create_engine, MetaData, exceptions
     from sqlalchemy.sql import operators
 except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
@@ -123,12 +123,15 @@ class DatabaseOperations(BaseDatabaseOperations):
                 defaults = kwargs.pop('defaults', {})
                 try:
                     return self.get(**kwargs), False
-                except self.model.DoesNotExist:
-                    params = dict([(k, v) for k, v in kwargs.items() if '__' not in k])
-                    params.update(defaults)
-                    obj = self.model(**params)
-                    obj.save()
-                    return obj, True
+                except exceptions.InvalidRequestError:
+                    try:
+                        params = dict([(k, v) for k, v in kwargs.items() if '__' not in k])
+                        params.update(defaults)
+                        obj = self.model(**params)
+                        obj.save()
+                        return obj, True
+                    except exceptions.InvalidRequestError:
+                        return self.get(**kwargs), False
 
             def latest(self, field_name=None):
                 """
