@@ -141,7 +141,6 @@ class DatabaseOperations(BaseDatabaseOperations):
 
             def in_bulk(self, id_list):
                 """
-                TODO:need to map
                 Returns a dictionary mapping each of the given IDs to the object with
                 that ID.
                 """
@@ -149,8 +148,8 @@ class DatabaseOperations(BaseDatabaseOperations):
                         "in_bulk() must be provided with a list of IDs."
                 if not id_list:
                     return {}
-                self.query = self.query.filter('pk__in', id_list)
-                return dict([(obj._get_pk_val(), obj) for obj in self.query])
+                qs = self.filter(**{'pk__in': id_list})
+                return dict([(obj._get_pk_val(), obj) for obj in qs.iterator()])
 
             def delete(self):
                 """

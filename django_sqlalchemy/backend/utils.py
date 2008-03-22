@@ -84,9 +84,8 @@ def parse_filter(queryset, exclude, **kwargs):
             value = value()
         
         field = reduce(lambda x, y: getattr(x, y), parts)
-        op = lookup_query_expression(lookup_type, field, smart_unicode(value, strings_only=True))
+        op = lookup_query_expression(lookup_type, field, value)
         expression = op()
-        
         if exclude:
             expression = ~(expression)
         query.query = query.query.filter(expression)
