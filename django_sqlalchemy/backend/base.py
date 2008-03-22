@@ -249,6 +249,10 @@ class DatabaseOperations(BaseDatabaseOperations):
                 return self._filter_or_exclude(True, *args, **kwargs)
 
             def _filter_or_exclude(self, exclude, *args, **kwargs):
+                """
+                This does the actual filtering, either combined filtering or 
+                excluding depending on the exclude flag.
+                """
                 return utils.parse_filter(self, exclude, **kwargs)
 
             def complex_filter(self, filter_obj):

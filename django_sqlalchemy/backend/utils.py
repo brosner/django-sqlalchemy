@@ -55,6 +55,18 @@ def lookup_query_expression(lookup_type, field, value):
     else:
         return None
         
+def lookup_attname(meta, value):
+    """
+    This looks up the correct attribute name if the attribute is the
+    pk attribute.
+    """
+    #FIXME: this is just here for now to correct the pk issue
+    # when we handle relationships we'll fix this.
+    if value == 'pk':
+        return meta.pk.attname
+    else:
+        return value
+
 def parse_filter(queryset, exclude, **kwargs):
     """
     Add a single filter to the query. The 'filter_expr' is a pair:
@@ -81,8 +93,10 @@ def parse_filter(queryset, exclude, **kwargs):
                 
         if callable(value):
             value = value()
-        
-        field = reduce(lambda x, y: getattr(x, y), parts)
+                    
+        #TODO: joins do not work, need to add in support
+        # for spanning relationships.
+        field = reduce(lambda x, y: getattr(x, lookup_attname(queryset.model._meta, y)), parts)
         op = lookup_query_expression(lookup_type, field, value)
         expression = op()
         if exclude:
