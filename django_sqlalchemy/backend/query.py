@@ -133,14 +133,11 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def update(self, **kwargs):
             """
-            TODO:need to map update
             Updates all elements in the current QuerySet, setting all the given
             fields to the appropriate values.
             """
-            query = self.query.clone(sql.UpdateQuery)
-            query.add_update_values(kwargs)
-            query.execute_sql(None)
-            self._result_cache = None
+            values = self._parse_update_values(**kwargs)
+            self.model.__table__.update(self.query.compile()._whereclause, values).execute()
         update.alters_data = True
 
         ##################################################
@@ -322,6 +319,19 @@ def sa_queryset_factory(DefaultQuerySet):
         ###################
         # PRIVATE METHODS #
         ###################
+
+        def _parse_update_values(self, **kwargs):
+            from django.db.models.base import Model
+            values = {}
+            for name, val in kwargs.iteritems():
+                field, model, direct, m2m = self.model._meta.get_field_by_name(name)
+                if not direct or m2m:
+                    raise FieldError('Cannot update model field %r (only non-relations and foreign keys permitted).' % field)
+                if field.rel and isinstance(val, Model):
+                    val = val.pk
+
+                values[field.column] = val
+            return values
 
         def _clone(self, klass=None, setup=False, **kwargs):
             if klass is None:
