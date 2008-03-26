@@ -1,4 +1,5 @@
 from optparse import make_option
+from django.core.management import call_command
 from django.core.management.base import NoArgsCommand
 
 class Command(NoArgsCommand):
@@ -15,4 +16,7 @@ class Command(NoArgsCommand):
         from django_sqlalchemy.backend import metadata, Session
         metadata.create_all()
         Session.commit()
+        # load fixtures
+        verbosity = int(options.get('verbosity', 1))
+        call_command('loaddata', 'initial_data', verbosity=verbosity)
         

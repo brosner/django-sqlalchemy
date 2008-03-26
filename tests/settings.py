@@ -10,8 +10,9 @@ DJANGO_SQLALCHEMY_ECHO = False
 
 INSTALLED_APPS = (
     'django_sqlalchemy',
-    'regression.sample_app',
-    'regression.norelations',
+    'apps.blog',
+    'apps.news',
+    'apps.norelations',
     )
 
 TEMPLATE_LOADERS = (

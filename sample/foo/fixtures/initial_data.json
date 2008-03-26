@@ -1,0 +1,12 @@
+[
+{"pk": "1", "model": "foo.category", "fields": {"name": "Python"}}, 
+{"pk": "2", "model": "foo.category", "fields": {"name": "PHP"}}, 
+{"pk": "3", "model": "foo.category", "fields": {"name": "Ruby"}}, 
+{"pk": "4", "model": "foo.category", "fields": {"name": "Smalltalk"}}, 
+{"pk": "5", "model": "foo.category", "fields": {"name": "CSharp"}}, 
+{"pk": "6", "model": "foo.category", "fields": {"name": "Modula"}}, 
+{"pk": "7", "model": "foo.category", "fields": {"name": "Algol"}}, 
+{"pk": "8", "model": "foo.category", "fields": {"name": "Forth"}}, 
+{"pk": "9", "model": "foo.category", "fields": {"name": "Pascal"}}, 
+{"pk": "10", "model": "foo.category", "fields": {"name": "BASIC"}}
+]

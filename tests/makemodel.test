@@ -1,6 +1,4 @@
->>> from regression.sample_app.models import Reporter, Source, Article
->>> from django.core.management import call_command
->>> call_command('syncdb')
+>>> from apps.news.models import Reporter, Source, Article
 >>> john_anderson = Reporter.objects.create(username="janderson0")
 >>> w_mark_felt = Source.objects.create(codename="Deep Throat")
 >>> watergate = Article()
