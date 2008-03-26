@@ -3,7 +3,7 @@ Tests are implemented using the Python Nose testing framework.
 Requirements: 
 
   Python Nose - http://code.google.com/p/python-nose/
-  Django-SQLAlchemy Nose Plugin - included in nose-django-sqlalchemy directory
+  Django-SQLAlchemy Nose Plugin - included in test/nose-django-sqlalchemy directory
 
 Installation:
 
