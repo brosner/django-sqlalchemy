@@ -64,9 +64,11 @@ class NoseDjangoSQLAlchemy(Plugin):
             map(add_path, self.conf.where)
 
         add_path(SETTINGS_PATH)
-        sys.path.append(SETTINGS_PATH)
-        import settings
+        sys.path.insert(0, SETTINGS_PATH)
+        
+        from django.conf import settings
         settings.DEBUG = False
+        
         from django.core import mail
         self.mail = mail
         from django.test.utils import setup_test_environment
