@@ -17,14 +17,13 @@ from django_sqlalchemy.backend.query import sa_queryset_factory
 # This gets rid of the unicode whining and follows Django's approach
 # to unicode handling.
 engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI, convert_unicode=True)
+engine.echo = getattr(settings, 'DJANGO_SQLALCHEMY_ECHO', False)
+
 Session = scoped_session(sessionmaker(
     bind=engine, transactional=True))
 
 # default metadata
 metadata = MetaData(bind=engine)
-
-if getattr(settings, 'DJANGO_SQLALCHEMY_ECHO'):
-    metadata.bind.echo = settings.DJANGO_SQLALCHEMY_ECHO
 
 DatabaseError = Exception
 IntegrityError = Exception
