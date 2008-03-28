@@ -10,41 +10,25 @@ class TestContains(object):
             {'name': 'Forth'}, {'name': 'Pascal'})
 
     @testing.fails_on('sqlite')
-    def test_simple_contains(self):
-        """
-        Do a simple contains test without relationships
-        """
+    def test_should_contain_string_in_name(self):
         assert 4 == Category.objects.filter(name__contains='a').count()
         assert 1 == Category.objects.filter(name__contains='A').count()
 
     @testing.fails_on_everything_except('sqlite')
-    def test_simple_contains_sqlite(self):
-        """
-        Do a simple contains test without relationships. Special
-        case for sqlite because it does not respect case
-        """
+    def test_should_contain_string_in_name_on_sqlite(self):
         assert 5 == Category.objects.filter(name__contains='a').count()
         assert 5 == Category.objects.filter(name__contains='A').count()
 
-    def test_simple_icontains(self):
-        """
-        Do a simple icontains test without relationships
-        """
+    def test_should_contain_string_in_name_regardless_of_case(self):
         assert 5 == Category.objects.filter(name__icontains='a').count()
         assert 5 == Category.objects.filter(name__icontains='A').count()
     
-    def test_simple_contains_at_beginning(self):
-        """
-        Do a simple contains test with the string at the beginning
-        """
+    def test_should_contain_string_at_beginning(self):
         category = Category.objects.filter(name__contains='Sma')
         assert 1 == category.count()
         assert_equal(u'Smalltalk', category[0].name)
     
-    def test_simple_contains_at_end(self):
-        """
-        Do a simple contains test with the string at the beginning
-        """
+    def test_should_contain_string_at_end(self):
         category = Category.objects.filter(name__contains='arp')
         assert 1 == category.count()
         assert_equal(u'CSharp', category[0].name)
