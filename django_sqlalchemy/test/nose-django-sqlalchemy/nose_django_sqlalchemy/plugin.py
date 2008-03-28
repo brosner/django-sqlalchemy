@@ -1,9 +1,6 @@
 """
 nose plugin for easy testing of the django-sqlalchemy project.
 """
-__author = 'Michael Trier'
-__version__ = '0.1'
-
 import atexit
 import logging
 import os, sys

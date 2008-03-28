@@ -60,7 +60,15 @@ def sa_queryset_factory(DefaultQuerySet):
             Performs the query and returns a single object matching the given
             keyword arguments.
             """
-            return self.filter(*args, **kwargs).query.one()
+            obj = self.filter(*args, **kwargs).all()
+            count = len(obj)
+            if count == 1:
+                return obj.query[0]
+            if not count:
+                raise self.model.DoesNotExist("%s matching query does not exist."
+                    % self.model._meta.object_name)
+            raise self.model.MultipleObjectsReturned("get() returned more than one %s -- it returned %s! Lookup parameters were %s"
+                    % (self.model._meta.object_name, count, kwargs))
 
         def first(self):
             """

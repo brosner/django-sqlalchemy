@@ -1,3 +1,0 @@
->>> from apps.blog.models import Category
->>> Category.objects.count()
-10
