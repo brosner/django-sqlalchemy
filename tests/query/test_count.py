@@ -22,5 +22,5 @@ class TestCount(object):
         assert 9 == Category.objects.all().count()
     
     @raises(AttributeError)
-    def test_should_raise_exception_on_get_count(self):
+    def test_should_raise_exception_on_get(self):
         assert 1 == Category.objects.get(name='Python').count()
