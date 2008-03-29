@@ -1,5 +1,4 @@
-from nose.tools import *
-from django_sqlalchemy.test import testing
+from django_sqlalchemy.test import *
 from apps.blog.models import Category
 
 class TestCount(object):

@@ -1,5 +1,4 @@
-from nose.tools import *
-from django_sqlalchemy.test import testing
+from django_sqlalchemy.test import *
 from apps.blog.models import Category
 
 class TestFirst(object):
@@ -16,7 +15,7 @@ class TestFirst(object):
         assert_equal(u'Smalltalk', Category.objects.filter(name__contains='a').first().name)
 
     def test_should_return_none_when_called_on_empty_queryset(self):
-        assert_equal(None, Category.objects.filter(name='foo').first())
+        assert_none(Category.objects.filter(name='foo').first())
     
     @raises(AttributeError)
     def test_should_raise_exception_after_a_get(self):

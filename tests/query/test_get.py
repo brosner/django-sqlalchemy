@@ -1,6 +1,5 @@
-from nose.tools import *
+from django_sqlalchemy.test import *
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned 
-from django_sqlalchemy.test import testing
 from apps.blog.models import Category
 
 class TestGet(object):

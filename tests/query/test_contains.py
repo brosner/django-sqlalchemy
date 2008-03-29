@@ -1,5 +1,4 @@
-from nose.tools import *
-from django_sqlalchemy.test import testing
+from django_sqlalchemy.test import *
 from apps.blog.models import Category
 
 class TestContains(object):
@@ -9,12 +8,12 @@ class TestContains(object):
             {'name': 'CSharp'}, {'name': 'Modula'}, {'name': 'Algol'},
             {'name': 'Forth'}, {'name': 'Pascal'})
 
-    @testing.fails_on('sqlite')
+    @fails_on('sqlite')
     def test_should_contain_string_in_name(self):
         assert 4 == Category.objects.filter(name__contains='a').count()
         assert 1 == Category.objects.filter(name__contains='A').count()
 
-    @testing.fails_on_everything_except('sqlite')
+    @fails_on_everything_except('sqlite')
     def test_should_contain_string_in_name_on_sqlite(self):
         assert 5 == Category.objects.filter(name__contains='a').count()
         assert 5 == Category.objects.filter(name__contains='A').count()
