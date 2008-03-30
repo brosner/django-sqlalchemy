@@ -17,6 +17,17 @@ class TestGet(object):
 
     def test_should_get_on_value(self):
         assert_equal(u'Modula', Category.objects.get(name='Modula').name)
+
+    def test_should_use_preexisting_filter(self):
+        # this is different from SA which ignores preexisting filters
+        category = Category.objects.get(pk=7)
+        category2 = Category.objects.filter(pk__gt=6).get(pk=7)
+        assert category2 is category
+        assert category2.id == category.id
+
+    @raises(ObjectDoesNotExist)    
+    def test_should_use_preexisting_filter_and_raise_accordingly(self):
+        Category.objects.filter(pk=9).get(pk=7)
     
     @raises(ObjectDoesNotExist)
     def test_should_raise_exception_when_no_items_returned(self):
