@@ -1,11 +1,11 @@
-
 from django.db import models
 from django_sqlalchemy.backend import metadata, Session
 from django_sqlalchemy.models import Field
 
 import sqlalchemy as sa
+from sqlalchemy import orm 
 
-class ForeignKey(models.ForeignKey):
+class ForeignKey(models.ForeignKey, Field):
     def __init__(self, to, *args, **kwargs):
         self.sa_column = None   
         models.ForeignKey.__init__(self, to, *args, **kwargs)
@@ -14,9 +14,11 @@ class ForeignKey(models.ForeignKey):
         # ForeignKey will be shadowed by the class inside of this method.
         fk_primary = list(self.rel.to.__table__.primary_key)[0]
         self.sa_column = sa.Column('%s_%s' % (
-            self.rel.to._meta.object_name.lower(),
-            self.rel.to._meta.pk.name), 
-                             fk_primary.type, sa.ForeignKey(fk_primary))
+                            self.rel.to._meta.object_name.lower(),
+                            self.rel.to._meta.pk.name), 
+                            fk_primary.type, sa.ForeignKey(fk_primary))
+        # self.sa_column = sa.orm.dynamic_loader(fk_primary.type, backref=self.rel.to._meta.object_name.lower())
+        # self.sa_rel_column = orm.relation("Category", backref="post_set")
         return self.sa_column
 
 class ManyToManyField(models.ManyToManyField, Field):
@@ -37,7 +39,7 @@ class ManyToManyField(models.ManyToManyField, Field):
     
     def contribute_to_class(self, cls, name):
         super(ManyToManyField, self).contribute_to_class(cls, name)
-        # m2m field needs to know the model it belongs too for create_column
+        # m2m field needs to know the model it belongs to for create_column
         # to work properly.
         self.model = cls
     

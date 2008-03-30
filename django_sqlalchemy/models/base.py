@@ -65,7 +65,11 @@ class ModelBase(models.base.ModelBase):
             # A ManyToManyField will return None for the column as it does
             # not need a column.
             if sa_field is not None:
-                our_stuff.append(sa_field)
+                # this allows us to build up more complex structures
+                if isinstance(sa_field, list):
+                    our_stuff.extend(sa_field)
+                else:
+                    our_stuff.append(sa_field)
         
         # SA supports autoloading the model from database, but that will
         # not work for Django. We're leaving this here just for future

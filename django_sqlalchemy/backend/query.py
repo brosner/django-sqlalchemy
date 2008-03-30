@@ -134,7 +134,7 @@ def sa_queryset_factory(DefaultQuerySet):
             """
             Deletes the records in the current QuerySet.
             """
-            # this approach although hackish results in one fewer
+            # this approach although hackish results in one less
             # query, the select. This is more optimized than
             # Django's default. Hopefully it won't pressent a
             # problem.
@@ -156,19 +156,23 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def values(self, *fields):
             """
-            TODO:need to map values
+            TODO:need to map values. waiting on this because SA is implementing
+            values which might end up being a map, except for the dict requirement
             """
-            # >>> b = a.from_statement(select([Category.c.name]))
-            # >>> print b
-            # SELECT foo_category.name AS foo_category_name 
-            # FROM foo_category
-            # >>> 
             return self._clone(klass=ValuesQuerySet, setup=True, _fields=fields)
 
         def valueslist(self, *fields, **kwargs):
             """
-            TODO:need to map valueslist
+            TODO:need to map values. waiting on this because SA is implementing
+            values which might end up being a map.
             """
+            # >>> v = Category.query.filter(Category.name.like('%a%'))._values(Category.id)
+            # >>> v.all()
+            # 2008-03-29 21:36:57,969 INFO sqlalchemy.engine.base.Engine.0x..90 SELECT foo_category.id AS foo_category_id 
+            # FROM foo_category 
+            # WHERE foo_category.name LIKE ?
+            # 2008-03-29 21:36:57,970 INFO sqlalchemy.engine.base.Engine.0x..90 ['%a%']
+            # [(4,), (5,), (6,), (7,), (9,), (11,)]
             flat = kwargs.pop('flat', False)
             if kwargs:
                 raise TypeError('Unexpected keyword arguments to valueslist: %s'
@@ -242,6 +246,14 @@ def sa_queryset_factory(DefaultQuerySet):
             else:
                 return self._filter_or_exclude(None, **filter_obj)
 
+        def options(self, *args):
+            """Return a new QuerySet object, applying the given list of
+            SQLAlchemy MapperOptions.
+            """
+            obj = self._clone()
+            obj.query.options(*args)
+            return obj
+
         def select_related(self, *fields, **kwargs):
             """
             TODO:need to map select_related
@@ -250,8 +262,6 @@ def sa_queryset_factory(DefaultQuerySet):
             related objects are included in the selection.
             """
             depth = kwargs.pop('depth', 0)
-            # TODO: Remove this? select_related(False) isn't really useful.
-            true_or_false = kwargs.pop('true_or_false', True)
             if kwargs:
                 raise TypeError('Unexpected keyword arguments to select_related: %s'
                         % (kwargs.keys(),))
@@ -261,7 +271,7 @@ def sa_queryset_factory(DefaultQuerySet):
                     raise TypeError('Cannot pass both "depth" and fields to select_related()')
                 obj.query.add_select_related(fields)
             else:
-                obj.query.select_related = true_or_false
+                obj.query.select_related = True
             if depth:
                 obj.query.max_depth = depth
             return obj
