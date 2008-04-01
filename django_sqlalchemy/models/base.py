@@ -2,13 +2,15 @@
 from django_sqlalchemy.backend import metadata, Session
 from django_sqlalchemy.models import *
 from django.db import models
-from sqlalchemy import *
 from sqlalchemy.schema import Table, SchemaItem, Column, MetaData
-from sqlalchemy.orm import synonym as _orm_synonym, mapper, relation
+from sqlalchemy.orm import synonym as _orm_synonym, mapper, comparable_property
 from sqlalchemy.orm.interfaces import MapperProperty
-from sqlalchemy.orm.properties import PropertyLoader
+from sqlalchemy.orm.properties import PropertyLoader, ColumnProperty
+from sqlalchemy import util, exceptions
+import types
 
-__all__ = ['Model', 'declarative_base', 'declared_synonym']
+__all__ = ['Model', 'ModelBase', 'synonym_for', 'comparable_using',
+           'declared_synonym']
 
 def is_base(cls):
     """
@@ -39,7 +41,24 @@ class ModelBase(models.base.ModelBase):
             return type.__init__(cls, classname, bases, dict_)
         
         cls._decl_class_registry[classname] = cls
-        our_stuff = []
+        
+        # this sets up our_stuff which reads in the attributes and converts
+        # them to SA columns, etc...
+        our_stuff = util.OrderedDict()
+        
+        # just here to handle SA declarative, not needed for Django
+        for k in dict_:
+            value = dict_[k]
+            if (isinstance(value, tuple) and len(value) == 1 and
+                isinstance(value[0], (Column, MapperProperty))):
+                util.warn("Ignoring declarative-like tuple value of attribute "
+                          "%s: possibly a copy-and-paste error with a comma "
+                          "left at the end of the line?" % k)
+                continue
+            if not isinstance(value, (Column, MapperProperty)):
+                continue
+            prop = _deferred_relation(cls, value)
+            our_stuff[k] = prop
         
         # Django will *always* have set the pk before we get here. Check if
         # it is a Django AutoField so we can override it with our own. This
@@ -66,70 +85,161 @@ class ModelBase(models.base.ModelBase):
             # not need a column.
             if sa_field is not None:
                 # this allows us to build up more complex structures
-                if isinstance(sa_field, list):
-                    our_stuff.extend(sa_field)
+                if isinstance(sa_field, dict):
+                    our_stuff.update(sa_field)
                 else:
-                    our_stuff.append(sa_field)
+                    our_stuff[sa_field.name] = sa_field
         
-        # SA supports autoloading the model from database, but that will
-        # not work for Django. We're leaving this here just for future
-        # consideration.
-        autoload = cls.__dict__.get('__autoload__')
-        if autoload:
-            table_kw = {'autoload': True}
+        table = None
+        tablename = cls._meta.db_table
+        
+        # this is to support SA's declarative to support declaring a Table
+        if '__table__' not in cls.__dict__:
+            # this is just to support SA's declarative of allowing the
+            # specification of the table name using this syntax
+            if '__tablename__' in cls.__dict__:
+                tablename = cls.__tablename__
+            
+            # SA supports autoloading the model from database, but that will
+            # not work for Django. We're leaving this here just for future
+            # consideration.
+            autoload = cls.__dict__.get('__autoload__')
+            if autoload:
+                table_kw = {'autoload': True}
+            else:
+                table_kw = {}
+            # this allows us to pick up only the Column types for our table
+            # definition.
+            cols = []
+            for key, c in our_stuff.iteritems():
+                if isinstance(c, ColumnProperty):
+                    for col in c.columns:
+                        if isinstance(col, Column) and col.table is None:
+                            _undefer_column_name(key, col)
+                            cols.append(col)
+                elif isinstance(c, Column):
+                    _undefer_column_name(key, c)
+                    cols.append(c)
+            cls.__table__ = table = Table(tablename, cls.metadata,
+                                          *cols, **table_kw)
         else:
-            table_kw = {}
+            table = cls.__table__
         
-        cls.__table__ = table = Table(cls._meta.db_table, cls.metadata, *our_stuff, **table_kw)
-        
-        inherits = cls.__mro__[1]
-        inherits = cls._decl_class_registry.get(inherits.__name__, None)
         mapper_args = getattr(cls, '__mapper_args__', {})
+        if 'inherits' not in mapper_args:
+            inherits = cls.__mro__[1]
+            inherits = cls._decl_class_registry.get(inherits.__name__, None)
+            mapper_args['inherits'] = inherits
         
-        cls.__mapper__ = mapper(cls, table, inherits=inherits, properties=dict([(f.name, f) for f in our_stuff]), **mapper_args)
+        # declarative allows you to specify a mapper as well
+        if hasattr(cls, '__mapper_cls__'):
+            mapper_cls = util.unbound_method_to_callable(cls.__mapper_cls__)
+        else:
+            mapper_cls = mapper
+        cls.__mapper__ = mapper_cls(cls, table, properties=our_stuff, **mapper_args)
+        
         # add the SA Query class onto our model class for easy querying
         cls.query = Session.query_property()
         return type.__init__(cls, classname, bases, dict_)
     
     def __setattr__(cls, key, value):
+        """
+        This sets up a setter that allows adding columns to the class after the 
+        attributes.
+        """
         if '__mapper__' in cls.__dict__:
             if isinstance(value, Column):
+                _undefer_column_name(key, value)
                 cls.__table__.append_column(value)
                 cls.__mapper__.add_property(key, value)
             elif isinstance(value, MapperProperty):
                 cls.__mapper__.add_property(key, _deferred_relation(cls, value))
-            elif isinstance(value, declared_synonym):
-                value._setup(cls, key, None)
             else:
                 type.__setattr__(cls, key, value)
         else:
             type.__setattr__(cls, key, value)
 
 def _deferred_relation(cls, prop):
+    """
+    If quoted names are used this does the lookup to the defined class
+    """
     if isinstance(prop, PropertyLoader) and isinstance(prop.argument, basestring):
         arg = prop.argument
         def return_cls():
-            return cls._decl_class_registry[arg]
+            try:
+                return cls._decl_class_registry[arg]
+            except KeyError:
+                raise exceptions.InvalidRequestError("When compiling mapper %s, could not locate a declarative class named %r.  Consider adding this property to the %r class after both dependent classes have been defined." % (prop.parent, arg, prop.parent.class_))
         prop.argument = return_cls
 
     return prop
 
-class declared_synonym(object):
-    def __init__(self, prop, name, mapperprop=None):
-        self.prop = prop
-        self.name = name
-        self.mapperprop = mapperprop
-        
-    def _setup(self, cls, key, init_dict):
-        prop = self.mapperprop or getattr(cls, self.name)
-        prop = _deferred_relation(cls, prop)
-        setattr(cls, key, self.prop)
-        if init_dict is not None:
-            init_dict[self.name] = prop
-            init_dict[key] = _orm_synonym(self.name)
-        else:
-            setattr(cls, self.name, prop)
-            setattr(cls, key, _orm_synonym(self.name))
+def synonym_for(name, map_column=False):
+    """Decorator, make a Python @property a query synonym for a column.
+
+    A decorator version of [sqlalchemy.orm#synonym()].  The function being
+    decorated is the 'descriptor', otherwise passes its arguments through
+    to synonym()::
+
+      @synonym_for('col')
+      @property
+      def prop(self):
+          return 'special sauce'
+
+    The regular ``synonym()`` is also usable directly in a declarative
+    setting and may be convenient for read/write properties::
+
+      prop = synonym('col', descriptor=property(_read_prop, _write_prop))
+
+    """
+    def decorate(fn):
+        return _orm_synonym(name, map_column=map_column, descriptor=fn)
+    return decorate
+
+
+def comparable_using(comparator_factory):
+    """Decorator, allow a Python @property to be used in query criteria.
+
+    A decorator front end to [sqlalchemy.orm#comparable_property()], passes
+    throgh the comparator_factory and the function being decorated::
+
+      @comparable_using(MyComparatorType)
+      @property
+      def prop(self):
+          return 'special sauce'
+
+    The regular ``comparable_property()`` is also usable directly in a
+    declarative setting and may be convenient for read/write properties::
+
+      prop = comparable_property(MyComparatorType)
+    """
+    def decorate(fn):
+        return comparable_property(comparator_factory, fn)
+    return decorate
+
+def declarative_base(engine=None, metadata=None, mapper=None):
+    lcl_metadata = metadata or MetaData()
+    if engine:
+        lcl_metadata.bind = engine
+    class Base(object):
+        __metaclass__ = DeclarativeMeta
+        metadata = lcl_metadata
+        if mapper:
+            __mapper_cls__ = mapper
+        _decl_class_registry = {}
+        def __init__(self, **kwargs):
+            for k in kwargs:
+                if not hasattr(type(self), k):
+                    raise TypeError('%r is an invalid keyword argument for %s' %
+                                    (k, type(self).__name__))
+                setattr(self, k, kwargs[k])
+    return Base
+
+def _undefer_column_name(key, column):
+    if column.key is None:
+        column.key = key
+    if column.name is None:
+        column.name = key
 
 class Model(models.Model):
     '''

@@ -17,9 +17,17 @@ class ForeignKey(models.ForeignKey, Field):
                             self.rel.to._meta.object_name.lower(),
                             self.rel.to._meta.pk.name), 
                             fk_primary.type, sa.ForeignKey(fk_primary))
-        # self.sa_column = sa.orm.dynamic_loader(fk_primary.type, backref=self.rel.to._meta.object_name.lower())
-        # self.sa_rel_column = orm.relation("Category", backref="post_set")
-        return self.sa_column
+        
+        self.sa_rel_column = orm.relation(self.rel.to, 
+                                          backref=self.related_name)
+        return { self.sa_column.name: self.sa_column, 
+                 self.related_name: self.sa_rel_column }
+
+    def contribute_to_related_class(self, cls, related):
+        # fk field needs to know the related_name it belongs to 
+        # for create_column to work properly.
+        super(ForeignKey, self).contribute_to_related_class(cls, related)
+        self.related_name = related.get_accessor_name()
 
 class ManyToManyField(models.ManyToManyField, Field):
     def __init__(self, to, *args, **kwargs):
