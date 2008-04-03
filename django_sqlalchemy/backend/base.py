@@ -57,4 +57,3 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             from django.db.backends.sqlite3.base import SQLiteCursorWrapper
             kwargs['factory'] = SQLiteCursorWrapper
         return conn.connection.cursor(**kwargs)
-

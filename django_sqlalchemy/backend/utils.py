@@ -99,8 +99,11 @@ def parse_filter(queryset, exclude, **kwargs):
             # break out the relationships from the lookup field
             fks = parts[0:-1]
             field = parts[-1]
+            import pdb
+            pdb.set_trace()
             # add in the joins
-            query.query.join([queryset.model._meta.get_field(f).attname for f in fks])
+            query.query.join(fks)
+            # query.query.join([queryset.model._meta.get_field(f).attname for f in fks])
             # add in the parts which is always related to the last join point
             parts = [queryset.model._meta.get_field(fks[-1]).rel.to, field]
         else:

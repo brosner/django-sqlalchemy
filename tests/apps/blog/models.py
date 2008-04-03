@@ -12,3 +12,6 @@ class Post(models.Model):
     category = models.ForeignKey(Category)
     body = models.TextField()
     is_draft = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.body

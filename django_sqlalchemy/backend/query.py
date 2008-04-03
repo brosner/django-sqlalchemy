@@ -28,7 +28,7 @@ def sa_queryset_factory(DefaultQuerySet):
             return self.query.count()
     
         def __iter__(self):
-            return iter(self.query)
+            return self.iterator()
         
         def __getitem__(self, k):
             return self.query.__getitem__(k)
@@ -159,27 +159,22 @@ def sa_queryset_factory(DefaultQuerySet):
             TODO:need to map values. waiting on this because SA is implementing
             values which might end up being a map, except for the dict requirement
             """
-            return self._clone(klass=ValuesQuerySet, setup=True, _fields=fields)
+            from django_sqlalchemy.models.query import SQLAlchemyValuesQuerySet
+            return self._clone(klass=SQLAlchemyValuesQuerySet, setup=True, _fields=fields)
 
         def valueslist(self, *fields, **kwargs):
             """
             TODO:need to map values. waiting on this because SA is implementing
             values which might end up being a map.
             """
-            # >>> v = Category.query.filter(Category.name.like('%a%'))._values(Category.id)
-            # >>> v.all()
-            # 2008-03-29 21:36:57,969 INFO sqlalchemy.engine.base.Engine.0x..90 SELECT foo_category.id AS foo_category_id 
-            # FROM foo_category 
-            # WHERE foo_category.name LIKE ?
-            # 2008-03-29 21:36:57,970 INFO sqlalchemy.engine.base.Engine.0x..90 ['%a%']
-            # [(4,), (5,), (6,), (7,), (9,), (11,)]
             flat = kwargs.pop('flat', False)
             if kwargs:
                 raise TypeError('Unexpected keyword arguments to valueslist: %s'
                         % (kwargs.keys(),))
             if flat and len(fields) > 1:
                 raise TypeError("'flat' is not valid when valueslist is called with more than one field.")
-            return self._clone(klass=ValuesListQuerySet, setup=True, flat=flat,
+            from django_sqlalchemy.models.query import SQLAlchemyValuesListQuerySet
+            return self._clone(klass=SQLAlchemyValuesListQuerySet, setup=True, flat=flat,
                     _fields=fields)
 
         def dates(self, field_name, kind, order='ASC'):
