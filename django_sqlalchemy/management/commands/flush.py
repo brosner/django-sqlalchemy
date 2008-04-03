@@ -44,9 +44,13 @@ Are you sure you want to do this?
         if confirm == 'yes':
             try:
                 from django_sqlalchemy.backend import metadata, Session
-                #TODO:this needs to be for only installed apps
-                metadata.drop_all()
-                metadata.create_all()
+                from django.core.management.sql import django_table_list
+                from sqlalchemy import Table
+
+                # only drop & re-create tables referenced by installed apps
+                tables = [Table(table_name, metadata, autoload=True) for table_name in django_table_list()]
+                metadata.drop_all(tables=tables)
+                metadata.create_all(tables=tables)
                 Session.commit()
         
             except Exception, e:
