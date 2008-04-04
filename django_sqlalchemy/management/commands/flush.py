@@ -1,6 +1,8 @@
 from django.core.management.base import NoArgsCommand, CommandError
 from django.core.management.color import no_style
 from optparse import make_option
+from django_sqlalchemy.management import sql
+from django.db import models
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
@@ -43,16 +45,15 @@ Are you sure you want to do this?
 
         if confirm == 'yes':
             try:
-                from django_sqlalchemy.backend import metadata, Session
-                from django.core.management.sql import django_table_list
-                from sqlalchemy import Table
-
-                # only drop & re-create tables referenced by installed apps
-                tables = [Table(table_name, metadata, autoload=True) for table_name in django_table_list()]
-                metadata.drop_all(tables=tables)
-                metadata.create_all(tables=tables)
-                Session.commit()
-        
+                from sqlalchemy import create_engine
+                # TODO: Original django code flushes by deleting rows from each table
+                # and reseting sequences back to zero. This reset/create approach has
+                # the disadvantage of dropping indicies django doesn't know about.
+                engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI)
+                app_list = models.get_apps()
+                for app in app_list:
+                    sql.reset(engine, app)
+                    sql.create(engine, app)        
             except Exception, e:
                 # transaction.rollback_unless_managed()
                 raise CommandError("""Database %s couldn't be flushed. Possible reasons:
