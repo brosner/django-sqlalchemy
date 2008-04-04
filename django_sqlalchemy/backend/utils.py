@@ -81,7 +81,7 @@ def parse_filter(queryset, exclude, **kwargs):
     
     for filter_expr in [(k, v) for k, v in kwargs.items()]:
         arg, value = filter_expr
-        parts = [queryset.model] + arg.split(LOOKUP_SEP)
+        parts = arg.split(LOOKUP_SEP)
         if not parts:
             raise FieldError("Cannot parse keyword query %r" % arg)
     
@@ -93,9 +93,22 @@ def parse_filter(queryset, exclude, **kwargs):
                 
         if callable(value):
             value = value()
-                    
-        #TODO: joins do not work, need to add in support
-        # for spanning relationships.
+        
+        # handle joins
+        if len(parts) > 1:
+            # break out the relationships from the lookup field
+            fks = parts[0:-1]
+            field = parts[-1]
+            import pdb
+            pdb.set_trace()
+            # add in the joins
+            query.query.join(fks)
+            # query.query.join([queryset.model._meta.get_field(f).attname for f in fks])
+            # add in the parts which is always related to the last join point
+            parts = [queryset.model._meta.get_field(fks[-1]).rel.to, field]
+        else:
+            parts = [queryset.model] + parts
+        
         field = reduce(lambda x, y: getattr(x, lookup_attname(queryset.model._meta, y)), parts)
         op = lookup_query_expression(lookup_type, field, value)
         expression = op()

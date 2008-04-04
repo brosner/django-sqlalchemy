@@ -1,5 +1,6 @@
 import datetime
 from django_sqlalchemy import models
+from sqlalchemy.orm import relation
 
 # Create your models here.
 class Category(models.Model):

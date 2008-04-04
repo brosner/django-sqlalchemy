@@ -28,7 +28,7 @@ def sa_queryset_factory(DefaultQuerySet):
             return self.query.count()
     
         def __iter__(self):
-            return iter(self.query)
+            return self.iterator()
         
         def __getitem__(self, k):
             return self.query.__getitem__(k)
@@ -134,7 +134,7 @@ def sa_queryset_factory(DefaultQuerySet):
             """
             Deletes the records in the current QuerySet.
             """
-            # this approach although hackish results in one fewer
+            # this approach although hackish results in one less
             # query, the select. This is more optimized than
             # Django's default. Hopefully it won't pressent a
             # problem.
@@ -156,18 +156,20 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def values(self, *fields):
             """
-            TODO:need to map values
+            Returns a list of dicts with only the columns specified. This works
+            by wrapping the SQLAlchemyQuerySet in a SQLAlchemyValuesQuerySet
+            that modifies the setup and iterator behavior.
             """
-            # >>> b = a.from_statement(select([Category.c.name]))
-            # >>> print b
-            # SELECT foo_category.name AS foo_category_name 
-            # FROM foo_category
-            # >>> 
-            return self._clone(klass=ValuesQuerySet, setup=True, _fields=fields)
+            from django_sqlalchemy.models.query import SQLAlchemyValuesQuerySet
+            return self._clone(klass=SQLAlchemyValuesQuerySet, setup=True, _fields=fields)
 
         def valueslist(self, *fields, **kwargs):
             """
-            TODO:need to map valueslist
+            Returns a list of tuples for each of the fields specified.  This
+            works by wrapping the SQLAlchemyQuerySet in a 
+            SQLAlchemyValuesListQuerySet that modifies the iterator behavior.
+            The flat option is only available with one column and flattens
+            out the tuples into a simple list.
             """
             flat = kwargs.pop('flat', False)
             if kwargs:
@@ -175,7 +177,8 @@ def sa_queryset_factory(DefaultQuerySet):
                         % (kwargs.keys(),))
             if flat and len(fields) > 1:
                 raise TypeError("'flat' is not valid when valueslist is called with more than one field.")
-            return self._clone(klass=ValuesListQuerySet, setup=True, flat=flat,
+            from django_sqlalchemy.models.query import SQLAlchemyValuesListQuerySet
+            return self._clone(klass=SQLAlchemyValuesListQuerySet, setup=True, flat=flat,
                     _fields=fields)
 
         def dates(self, field_name, kind, order='ASC'):
@@ -242,6 +245,14 @@ def sa_queryset_factory(DefaultQuerySet):
             else:
                 return self._filter_or_exclude(None, **filter_obj)
 
+        def options(self, *args):
+            """Return a new QuerySet object, applying the given list of
+            SQLAlchemy MapperOptions.
+            """
+            obj = self._clone()
+            obj.query.options(*args)
+            return obj
+
         def select_related(self, *fields, **kwargs):
             """
             TODO:need to map select_related
@@ -250,8 +261,6 @@ def sa_queryset_factory(DefaultQuerySet):
             related objects are included in the selection.
             """
             depth = kwargs.pop('depth', 0)
-            # TODO: Remove this? select_related(False) isn't really useful.
-            true_or_false = kwargs.pop('true_or_false', True)
             if kwargs:
                 raise TypeError('Unexpected keyword arguments to select_related: %s'
                         % (kwargs.keys(),))
@@ -261,7 +270,7 @@ def sa_queryset_factory(DefaultQuerySet):
                     raise TypeError('Cannot pass both "depth" and fields to select_related()')
                 obj.query.add_select_related(fields)
             else:
-                obj.query.select_related = true_or_false
+                obj.query.select_related = True
             if depth:
                 obj.query.max_depth = depth
             return obj
