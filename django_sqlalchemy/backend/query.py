@@ -156,16 +156,20 @@ def sa_queryset_factory(DefaultQuerySet):
 
         def values(self, *fields):
             """
-            TODO:need to map values. waiting on this because SA is implementing
-            values which might end up being a map, except for the dict requirement
+            Returns a list of dicts with only the columns specified. This works
+            by wrapping the SQLAlchemyQuerySet in a SQLAlchemyValuesQuerySet
+            that modifies the setup and iterator behavior.
             """
             from django_sqlalchemy.models.query import SQLAlchemyValuesQuerySet
             return self._clone(klass=SQLAlchemyValuesQuerySet, setup=True, _fields=fields)
 
         def valueslist(self, *fields, **kwargs):
             """
-            TODO:need to map values. waiting on this because SA is implementing
-            values which might end up being a map.
+            Returns a list of tuples for each of the fields specified.  This
+            works by wrapping the SQLAlchemyQuerySet in a 
+            SQLAlchemyValuesListQuerySet that modifies the iterator behavior.
+            The flat option is only available with one column and flattens
+            out the tuples into a simple list.
             """
             flat = kwargs.pop('flat', False)
             if kwargs:
