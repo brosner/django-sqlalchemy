@@ -100,7 +100,7 @@ def parse_filter(queryset, exclude, **kwargs):
             fks = parts[0:-1]
             field = parts[-1]
             # add in the joins
-            query.query.join(fks)
+            query.query = query.query.join(fks)
             # query.query.join([queryset.model._meta.get_field(f).attname for f in fks])
             # add in the parts which is always related to the last join point
             parts = [queryset.model._meta.get_field(fks[-1]).rel.to, field]

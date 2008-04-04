@@ -88,7 +88,6 @@ class ForeignKey(models.ForeignKey, Field):
                             self.rel.to._meta.object_name.lower(),
                             self.rel.to._meta.pk.name), 
                             fk_primary.type, sa.ForeignKey(fk_primary))
-        
         self.sa_rel_column = self.relation or orm.relation(self.rel.to)
         # self.sa_rel_column = self.relation or orm.relation(self.rel.to, 
         #                                           backref=orm.backref(self.related_name, 
