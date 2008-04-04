@@ -15,7 +15,7 @@ class Command(NoArgsCommand):
     def handle_inspection(self):
         from django.db import connection, get_introspection_module
         from django_sqlalchemy.backend import metadata
-        from sqlalchemy import Table, types
+        from sqlalchemy import Table
         import keyword
 
         introspection_module = get_introspection_module()
@@ -77,18 +77,7 @@ class Command(NoArgsCommand):
                         except IndexError:
                             column_type = column.type.__class__
                         
-                        field_type = {types.String: 'CharField',
-                                      types.Text: 'TextField',
-                                      types.Integer: 'IntegerField',
-                                      types.Date: 'DateField',
-                                      types.DateTime: 'DateTimeField',
-                                      types.Float: 'FloatField',
-                                      types.Time: 'TimeField',
-                                      types.Integer: 'IntegerField',
-                                      types.Numeric: 'DecimalField',
-                                      types.SmallInteger: 'SmallIntegerField',
-                                      types.Boolean: 'BooleanField',
-                                      }[column_type]
+                        field_type = introspection_module.DATA_TYPES_REVERSE[column_type]
                     except KeyError:
                         field_type = 'TextField'
                         comment_notes.append('This field type is a guess.')

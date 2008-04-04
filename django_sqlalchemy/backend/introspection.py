@@ -1,5 +1,5 @@
 from django_sqlalchemy.backend import metadata
-from sqlalchemy import Table
+from sqlalchemy import Table, types
 
 def get_table_list(cursor):
     """
@@ -72,3 +72,16 @@ def get_indexes(cursor, table_name):
                                     'unique': False,}
     return indexes
 
+DATA_TYPES_REVERSE = {
+  types.String: 'CharField',
+  types.Text: 'TextField',
+  types.Integer: 'IntegerField',
+  types.Date: 'DateField',
+  types.DateTime: 'DateTimeField',
+  types.Float: 'FloatField',
+  types.Time: 'TimeField',
+  types.Integer: 'IntegerField',
+  types.Numeric: 'DecimalField',
+  types.SmallInteger: 'SmallIntegerField',
+  types.Boolean: 'BooleanField',
+}
