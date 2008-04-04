@@ -23,7 +23,7 @@ def _name_to_index(cursor, table_name):
     """
     Returns a dictionary of {field_name: field_index} for the given table.
     Indexes are 0-based.
-                    """
+    """
     return dict([(d[0], i) for i, d in enumerate(get_table_description(cursor, table_name))])
         
 def get_relations(cursor, table_name):
@@ -61,6 +61,8 @@ def get_indexes(cursor, table_name):
     indexes = {}
 
     for column in table.columns:
+        # note: sqlalchemy doesn't yet populate column.unique
+        # and column.index upon reflection
         if column.primary_key:
             indexes[column.name] = {'primary_key': True,
                                     'unique': True,}

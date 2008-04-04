@@ -15,10 +15,12 @@ class Command(NoArgsCommand):
     def handle_inspection(self):
         from django.db import connection, get_introspection_module
         from django_sqlalchemy.backend import metadata
-        from sqlalchemy import Table
+        from sqlalchemy import Table, logging
         import keyword
 
         introspection_module = get_introspection_module()
+        # TODO: remove this once logging is turned off globally
+        metadata.bind.echo = False
         metadata.reflect()
         
         table2model = lambda table_name: table_name.title().replace('_', '')
