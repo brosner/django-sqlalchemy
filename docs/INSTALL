@@ -1,0 +1,5 @@
+Requirements:
+
+SqlAlchemy 0.4.5 - http://pypi.python.org/pypi/SQLAlchemy/0.4.5
+Django "queryset-refactor" Branch - svn co http://code.djangoproject.com/svn/django/branches/queryset-refactor 
+
