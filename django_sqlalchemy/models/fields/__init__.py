@@ -196,6 +196,10 @@ class PositiveSmallIntegerField(models.PositiveSmallIntegerField, IntegerField):
 
 class SlugField(models.SlugField, CharField):
     def __init__(self, *args, **kwargs):
+        #FIXME: the metaclass for Fields gets called before the __init__ for
+        #       SlugField, so the max_length fixup errors out before max_length
+        #       has a chance to be set.  This problem occurs for all fields.
+        kwargs['max_length'] = kwargs.get('max_length', 50)        
         models.SlugField.__init__(self, *args, **kwargs)
         CharField.__init__(self, *args, **kwargs)
 
