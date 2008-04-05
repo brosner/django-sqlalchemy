@@ -2,7 +2,6 @@ import operator
 
 from django.db.models.sql.constants import *
 from django.core.exceptions import FieldError
-from django.db.models.sql.constants import QUERY_TERMS
 from django.utils.functional import curry
 from sqlalchemy.sql import func, desc, asc
 
@@ -27,6 +26,10 @@ def lookup_query_expression(lookup_type, field, value):
         return curry(field.in_, value)
     elif lookup_type == 'startswith':        
         return curry(field.like, '%s%%' % value)
+    elif lookup_type == 'like':        
+        return curry(field.like, '%s' % value)
+    elif lookup_type == 'ilike':        
+        return curry(field.ilike, '%s' % value)    
     elif lookup_type == 'istartswith':
         return curry(field.ilike, '%s%%' % value)
     elif lookup_type == 'endswith':
@@ -60,8 +63,6 @@ def lookup_attname(meta, value):
     This looks up the correct attribute name if the attribute is the
     pk attribute.
     """
-    #FIXME: this is just here for now to correct the pk issue
-    # when we handle relationships we'll fix this.
     if value == 'pk':
         return meta.pk.attname
     else:

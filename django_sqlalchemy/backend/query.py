@@ -228,7 +228,8 @@ def sa_queryset_factory(DefaultQuerySet):
             This does the actual filtering, either combined filtering or 
             excluding depending on the exclude flag.
             """
-            return utils.parse_filter(self, exclude, **kwargs)
+            from django_sqlalchemy.models import query_utils
+            return query_utils.parse_filter(self, exclude, **kwargs)
 
         def complex_filter(self, filter_obj):
             """
@@ -292,7 +293,8 @@ def sa_queryset_factory(DefaultQuerySet):
                     errors.append(item)
             if errors:
                 raise FieldError('Invalid order_by arguments: %s' % errors)
-            return utils.parse_order_by(obj, *field_names)
+            from django_sqlalchemy.models import query_utils
+            return query_utils.parse_order_by(obj, *field_names)
         
         def distinct(self, true_or_false=True):
             """
