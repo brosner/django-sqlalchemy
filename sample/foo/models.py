@@ -13,6 +13,8 @@ class Category(models.Model):
     
 class Post(models.Model):
     pub_date = models.DateTimeField(default=datetime.datetime.now)
+    title = models.CharField(max_length=100)
+    slug = models.SlugField()
     category = models.ForeignKey(Category)
     body = models.TextField(blank=True)
     
