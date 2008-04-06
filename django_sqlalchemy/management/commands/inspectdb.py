@@ -71,21 +71,17 @@ class Command(NoArgsCommand):
                     else:
                         extra_params['db_column'] = att_name
                 else:
-                    try:
-                        # TODO: field type conversion logic could go into a utility
-                        column = table.columns[att_name]
-                        column_type = None
-                        try:
-                            # see if we can find a known data type in the bases
-                            for b in column.type.__class__.__bases__:
-                                if b in introspection_module.DATA_TYPES_REVERSE:
-                                    column_type = b
-                                    break                            
-                        except IndexError:
-                            column_type = column.type.__class__
+                    # TODO: field type conversion logic could go into a utility
+                    column = table.columns[att_name]
+                    bases = column.type.__class__.__bases__
+                    field_type = None
                         
-                        field_type = introspection_module.DATA_TYPES_REVERSE[column_type]
-                    except KeyError:
+                    for column_type in bases:
+                        if introspection_module.DATA_TYPES_REVERSE.has_key(column_type):
+                            field_type = introspection_module.DATA_TYPES_REVERSE[column_type]
+                            break
+                        
+                    if field_type is None:    
                         field_type = 'TextField'
                         comment_notes.append('This field type is a guess.')
 
