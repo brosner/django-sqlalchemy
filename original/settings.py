@@ -73,5 +73,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'original.foo'
+    'original.foo',
+    'original.bar',
 )
