@@ -5,15 +5,15 @@ def get_table_list(cursor):
     """
     Returns a list of tables in the current database.
     """    
-
     # Load all available table definitions from the database
     metadata.reflect()
     
     return metadata.tables.keys()
 
 def get_table_description(cursor, table_name):
-    "Returns a description of the table, with the DB-API cursor.description interface."
-    
+    """
+    Returns a description of the table, with the DB-API cursor.description interface.
+    """
     t = Table(table_name, metadata, autoload=True)
     result = t.select().limit(1).execute()
 
