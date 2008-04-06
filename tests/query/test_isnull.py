@@ -14,11 +14,13 @@ class TestIsNull(object):
             {'name': 'PHP', 'slug': 'php', 'description': 'What is a namespace?'}, 
             {'name': 'Ruby', 'slug': 'ruby', 'description': 'Spankin the monkey patch'}, 
             {'name': 'Smalltalk', 'slug': 'smalltalk', 'description': 'No symbol left unturned'}, 
-            {'name': 'CSharp', 'slug': 'csharp'}, 
-            {'name': 'Modula', 'slug': 'modula', 'active': False}, 
-            {'name': 'Algol', 'slug': 'algol', 'active': False})
+            {'name': 'CSharp', 'slug': 'csharp'})
+        # FIXME: for some reason SA will override the create with the default 
+        # even if it's specified. I need to figure a way around this. It's 
+        # preferable to do setup through SA directly.
+        Category.objects.create(**{'name': 'Modula', 'slug': 'modula', 'active': False})
+        Category.objects.create(**{'name': 'Algol', 'slug': 'algol', 'active': False})
 
-    @testing.future
     def test_should_find_all_items_where_field_is_null(self):
         categories = Category.objects.filter(description__isnull=True).order_by('name')
         assert_equal(['CSharp'], [c.name for c in categories])
@@ -29,7 +31,6 @@ class TestIsNull(object):
         assert_equal(['PHP', 'Python', 'Ruby', 'Smalltalk'], [c.name for c in categories])
         assert 4 == categories.count()
 
-    @testing.future
     def test_should_find_all_items_where_field_is_equal_to_none(self):
         categories = Category.objects.filter(description=None).order_by('name')
         assert_equal(['CSharp'], [c.name for c in categories])
