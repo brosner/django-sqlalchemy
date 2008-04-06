@@ -13,6 +13,7 @@ INSTALLED_APPS = (
     'apps.blog',
     'apps.news',
     'apps.norelations',
+    'apps.categories',
     )
 
 TEMPLATE_LOADERS = (
