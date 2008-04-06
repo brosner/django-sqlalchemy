@@ -24,7 +24,8 @@ class SQLAlchemyValuesQuerySet(QuerySet):
         """
         if self._fields:
             # do something here to get around SA _values limitation
-            field_names = [c.column for c in self.query._entities if isinstance(c, _ColumnEntity)] + list(self._fields) 
+            field_names = list(self._fields) + (self.field_names or [])
+            # field_names = [c.column for c in self.query._entities if isinstance(c, _ColumnEntity)] + list(self._fields) 
         else:
             # Default to all fields.
             field_names = [f.attname for f in self.model._meta.fields]

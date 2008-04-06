@@ -7,7 +7,7 @@ class Category(models.Model):
     slug = models.SlugField()
     # parent = models.ForeignKey('self', null=True, blank=True, db_column='parent_id', related_name='children')
     active = models.BooleanField(default=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(null=True, blank=True)
     
     objects = managers.CategoryManager()
     

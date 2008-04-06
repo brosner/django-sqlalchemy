@@ -10,14 +10,15 @@ class TestIsNull(object):
     
     def setup(self):
         Category.__table__.insert().execute(
-            {'name': 'Python', 'description': 'We got your whitespace.'}, 
-            {'name': 'PHP', 'description': 'What is a namespace?'}, 
-            {'name': 'Ruby', 'description': 'Spankin the monkey patch'}, 
-            {'name': 'Smalltalk', 'description': 'No symbol left unturned'}, 
-            {'name': 'CSharp'}, 
-            {'name': 'Modula', 'active': False}, 
-            {'name': 'Algol', 'active': False})
+            {'name': 'Python', 'slug': 'python', 'description': 'We got your whitespace.'}, 
+            {'name': 'PHP', 'slug': 'php', 'description': 'What is a namespace?'}, 
+            {'name': 'Ruby', 'slug': 'ruby', 'description': 'Spankin the monkey patch'}, 
+            {'name': 'Smalltalk', 'slug': 'smalltalk', 'description': 'No symbol left unturned'}, 
+            {'name': 'CSharp', 'slug': 'csharp'}, 
+            {'name': 'Modula', 'slug': 'modula', 'active': False}, 
+            {'name': 'Algol', 'slug': 'algol', 'active': False})
 
+    @testing.future
     def test_should_find_all_items_where_field_is_null(self):
         categories = Category.objects.filter(description__isnull=True).order_by('name')
         assert_equal(['CSharp'], [c.name for c in categories])
@@ -25,9 +26,10 @@ class TestIsNull(object):
     
     def test_should_find_all_items_where_field_is_not_null(self):
         categories = Category.objects.exclude(description__isnull=True).order_by('name')
-        assert_equal(['Python', 'PHP', 'Ruby', 'Smalltalk'], [c.name for c in categories])
+        assert_equal(['PHP', 'Python', 'Ruby', 'Smalltalk'], [c.name for c in categories])
         assert 4 == categories.count()
 
+    @testing.future
     def test_should_find_all_items_where_field_is_equal_to_none(self):
         categories = Category.objects.filter(description=None).order_by('name')
         assert_equal(['CSharp'], [c.name for c in categories])
@@ -35,7 +37,7 @@ class TestIsNull(object):
     
     def test_should_find_all_items_where_field_is_not_equal_to_none(self):
         categories = Category.objects.exclude(description=None).order_by('name')
-        assert_equal(['Python', 'PHP', 'Ruby', 'Smalltalk'], [c.name for c in categories])
+        assert_equal(['PHP', 'Python', 'Ruby', 'Smalltalk'], [c.name for c in categories])
         assert 4 == categories.count()
 
     # def test_should_find_all_items_where_fk_is_null(self):

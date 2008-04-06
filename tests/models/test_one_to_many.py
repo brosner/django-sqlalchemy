@@ -26,7 +26,7 @@ class TestOneToMany(object):
     def test_should_reference_related_table_items(self):
         c = Category.objects.get(name="Python")
         assert_equal(2, c.post_set.count())
-        assert_equal(['Why it is pronounced Jango and not DJ-Ango.', 
-                      'Intermediate Models - Will they ever happen?'], 
-                     [p.body for p in c.post_set..order_by('body')])
+        assert_equal(['Intermediate Models - Will they ever happen?',
+                      'Why it is pronounced Jango and not DJ-Ango.'], 
+                     [p.body for p in c.post_set.order_by('body')])
 
