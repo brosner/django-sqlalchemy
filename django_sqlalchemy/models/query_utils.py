@@ -5,7 +5,6 @@ from django.core.exceptions import FieldError
 from django.utils.functional import curry
 from sqlalchemy.sql import func, desc, asc
 
-
 QUERY_TERMS_MAPPING = {
     'exact': operator.eq, 
     'iexact': operator.eq, 
@@ -15,7 +14,7 @@ QUERY_TERMS_MAPPING = {
     'lte': operator.le
 }
 
-def lookup_query_expression(lookup_type, field, value):
+def _lookup_query_expression(lookup_type, field, value):
     if lookup_type in QUERY_TERMS_MAPPING:
         return curry(QUERY_TERMS_MAPPING[lookup_type], field, value)
     elif lookup_type == 'contains':
@@ -110,7 +109,7 @@ def parse_filter(queryset, exclude, **kwargs):
             parts = [queryset.model] + parts
         
         field = reduce(lambda x, y: getattr(x, lookup_attname(parts[0]._meta, y)), parts)
-        op = lookup_query_expression(lookup_type, field, value)
+        op = _lookup_query_expression(lookup_type, field, value)
         expression = op()
         if exclude:
             expression = ~(expression)
