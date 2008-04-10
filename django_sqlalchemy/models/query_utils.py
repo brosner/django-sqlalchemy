@@ -66,7 +66,8 @@ def lookup_attname(meta, value):
     if value == 'pk':
         return meta.pk.attname
     else:
-        return value
+        field, model, direct, m2m = meta.get_field_by_name(value)
+        return field.attname
 
 def parse_filter(queryset, exclude, **kwargs):
     """

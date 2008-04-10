@@ -30,3 +30,11 @@ class TestOneToMany(object):
                       'Why it is pronounced Jango and not DJ-Ango.'], 
                      [p.body for p in c.post_set.order_by('body')])
 
+    def test_should_get_related_item(self):
+        p = Post.objects.get(body='Has Many Bugs Through Rails')
+        assert_equal(Category.objects.get(name='Ruby'), p.category)
+    
+    @testing.future
+    def test_should_query_across_related_item(self):
+        p = Post.objects.filter(category__name__icontains='r')
+        assert_equal(3, p.count())

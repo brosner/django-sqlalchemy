@@ -20,6 +20,12 @@ class TestIsNull(object):
         # preferable to do setup through SA directly.
         Category.objects.create(**{'name': 'Modula', 'slug': 'modula', 'active': False})
         Category.objects.create(**{'name': 'Algol', 'slug': 'algol', 'active': False})
+        # Category.__table__.insert().execute(
+        #             {'name': 'Django', 'slug': 'django', 'description': 'For perfectionists', 'parent': 1}, 
+        #             {'name': 'Pylons', 'slug': 'pylons', 'parent': 1}, 
+        #             {'name': 'Turbo Gears', 'slug': 'turbo-gears', 'description': 'Just like Turbo Pylons', 'parent': 1}, 
+        #             {'name': 'Cake', 'slug': 'cake', 'description': 'Have it and eat it too', 'parent': 2}, 
+        #             {'name': 'Merb', 'slug': 'merb', 'description': 'Because it is not Rails', 'parent': 3}) 
 
     def test_should_find_all_items_where_field_is_null(self):
         categories = Category.objects.filter(description__isnull=True).order_by('name')
@@ -41,13 +47,8 @@ class TestIsNull(object):
         assert_equal(['PHP', 'Python', 'Ruby', 'Smalltalk'], [c.name for c in categories])
         assert 4 == categories.count()
 
-    # def test_should_find_all_items_where_fk_is_null(self):
-    #     assert 3 == Category.objects.filter(name__in=['Forth', 'Ruby', 'Python']).count()
-    # 
-    # def test_should_find_all_items_where_fk_is_not_null(self):
-    #     assert 1 == Category.objects.filter(name__in=['Brainf**k', 'Smalltalk', 'FACTOR']).count()
-
-# >>> Tag.objects.filter(parent__isnull=True).order_by('name')
-# [<Tag: t1>]
-# >>> Tag.objects.exclude(parent__isnull=True).order_by('name')
-# [<Tag: t2>, <Tag: t3>, <Tag: t4>, <Tag: t5>]
+    @testing.future
+    def test_should_find_all_related_items_where_field_is_null(self):
+        categories = Category.objects.filter(parent__description__isnull=True).order_by('name')
+        assert_equal(['CSharp'], [c.name for c in categories])
+        assert 1 == categories.count()
