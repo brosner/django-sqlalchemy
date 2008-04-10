@@ -1,3 +1,15 @@
+from django.conf import settings
+
+__all__ = 'parse_db_uri', 'db_url', 'db_label'
+
+def parse_db_uri():
+    """
+    Parse the dburi and pull out the full dburi and the label only
+    """
+    db_url = getattr(settings, 'DJANGO_SQLALCHEMY_DBURI', "sqlite://")
+    db_label = db_url[:db_url.index(':')]
+    return (db_url, db_label)
+db_url, db_label = parse_db_uri()
 
 class MethodContainer(object):
     pass
