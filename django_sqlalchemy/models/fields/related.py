@@ -82,12 +82,21 @@ class ForeignKey(models.ForeignKey, Field):
         models.ForeignKey.__init__(self, to, *args, **kwargs)
     
     def create_column(self):
-        # ForeignKey will be shadowed by the class inside of this method.
-        fk_primary = list(self.rel.to.__table__.primary_key)[0]
+        # try to get the ForeignKey using the SA Column.  If it doesn't work 
+        # then it's likely a self-referential situation and then just build
+        # up the quoted name.
+        options = self.rel.to._meta
+        
+        try:
+            fk_primary = list(self.rel.to.__table__.primary_key)[0]
+        except:
+            fk_primary = '%s.%s' % (options.db_table, options.pk.name)
+        
         self.sa_column = sa.Column('%s_%s' % (
-                            self.rel.to._meta.object_name.lower(),
-                            self.rel.to._meta.pk.name), 
-                            fk_primary.type, sa.ForeignKey(fk_primary))
+                            options.object_name.lower(),
+                            options.pk.name), 
+                            options.pk.sa_column_type().__class__, 
+                            sa.ForeignKey(fk_primary))
         self.sa_rel_column = self.relation or orm.relation(self.rel.to)
         # self.sa_rel_column = self.relation or orm.relation(self.rel.to, 
         #                                           backref=orm.backref(self.related_name, 
@@ -101,7 +110,7 @@ class ForeignKey(models.ForeignKey, Field):
         #                                   primaryjoin=users_table.c.user_id==addresses_table.c.user_id, 
         #                                   foreign_keys=[addresses_table.c.user_id])
         return { self.sa_column.name: self.sa_column, 
-                 self.rel.to._meta.object_name.lower(): self.sa_rel_column }
+                 options.object_name.lower(): self.sa_rel_column }
 
     def contribute_to_related_class(self, cls, related):
         # fk field needs to know the related_name it belongs to 
