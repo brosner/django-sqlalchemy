@@ -37,6 +37,9 @@ class ModelBase(models.base.ModelBase):
         return super(ModelBase, cls).__new__(cls, name, bases, attrs)
     
     def __init__(cls, classname, bases, dict_):
+        if hasattr(cls, "__table__"):
+            return None
+        
         if '_decl_class_registry' in cls.__dict__:
             return type.__init__(cls, classname, bases, dict_)
         
