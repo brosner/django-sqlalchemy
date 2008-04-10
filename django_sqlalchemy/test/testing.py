@@ -1,8 +1,6 @@
 from django_sqlalchemy import utils
 from django_sqlalchemy.test.compat import *    
 
-db_url, db_label = utils.parse_db_uri()
-
 def future(fn):
     """Mark a test as expected to unconditionally fail.
 
@@ -32,7 +30,7 @@ def fails_on(*dbs):
     def decorate(fn):
         fn_name = fn.__name__
         def maybe(*args, **kw):
-            if db_label not in dbs:
+            if utils.db_label not in dbs:
                 return fn(*args, **kw)
             else:
                 try:
@@ -40,12 +38,12 @@ def fails_on(*dbs):
                 except Exception, ex:
                     print ("'%s' failed as expected on DB implementation "
                            "'%s': %s" % (
-                        fn_name, db_label, str(ex)))
+                        fn_name, utils.db_label, str(ex)))
                     return True
                 else:
                     raise AssertionError(
                         "Unexpected success for '%s' on DB implementation '%s'" %
-                        (fn_name, db_label))
+                        (fn_name, utils.db_label))
         return _function_named(maybe, fn_name)
     return decorate
 
@@ -59,7 +57,7 @@ def fails_on_everything_except(*dbs):
     def decorate(fn):
         fn_name = fn.__name__
         def maybe(*args, **kw):
-            if db_label in dbs:
+            if utils.db_label in dbs:
                 return fn(*args, **kw)
             else:
                 try:
@@ -67,12 +65,12 @@ def fails_on_everything_except(*dbs):
                 except Exception, ex:
                     print ("'%s' failed as expected on DB implementation "
                            "'%s': %s" % (
-                        fn_name, db_label, str(ex)))
+                        fn_name, utils.db_label, str(ex)))
                     return True
                 else:
                     raise AssertionError(
                         "Unexpected success for '%s' on DB implementation '%s'" %
-                        (fn_name, db_label))
+                        (fn_name, utils.db_label))
         return _function_named(maybe, fn_name)
     return decorate
 
@@ -86,9 +84,9 @@ def unsupported(*dbs):
     def decorate(fn):
         fn_name = fn.__name__
         def maybe(*args, **kw):
-            if db_label in dbs:
+            if utils.db_label in dbs:
                 print "'%s' unsupported on DB implementation '%s'" % (
-                    fn_name, db_label)
+                    fn_name, utils.db_label)
                 return True
             else:
                 return fn(*args, **kw)
