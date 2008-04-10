@@ -109,7 +109,7 @@ def parse_filter(queryset, exclude, **kwargs):
         else:
             parts = [queryset.model] + parts
         
-        field = reduce(lambda x, y: getattr(x, lookup_attname(queryset.model._meta, y)), parts)
+        field = reduce(lambda x, y: getattr(x, lookup_attname(parts[0]._meta, y)), parts)
         op = lookup_query_expression(lookup_type, field, value)
         expression = op()
         if exclude:

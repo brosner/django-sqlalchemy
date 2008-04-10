@@ -34,7 +34,6 @@ class TestOneToMany(object):
         p = Post.objects.get(body='Has Many Bugs Through Rails')
         assert_equal(Category.objects.get(name='Ruby'), p.category)
     
-    @testing.future
     def test_should_query_across_related_item(self):
         p = Post.objects.filter(category__name__icontains='r')
         assert_equal(3, p.count())
