@@ -4,6 +4,25 @@ from django.db.models.sql.constants import *
 from django.core.exceptions import FieldError
 from django.utils.functional import curry
 from sqlalchemy.sql import func, desc, asc
+from django_sqlalchemy import utils
+
+def _get_range_lookup(lookup_type, value):
+    if lookup_type == 'year':
+        try:
+            value = int(value)
+        except ValueError:
+            raise ValueError("The __year lookup type requires an integer argument")
+        if utils.db_label == 'sqlite':
+            first = '%s-01-01'
+            second = '%s-12-31 23:59:59.999999'
+        elif utils.db_label == 'oracle': # and self.get_internal_type() == 'DateField':
+            first = '%s-01-01'
+            second = '%s-12-31'
+        else:
+            first = '%s-01-01 00:00:00'
+            second = '%s-12-31 23:59:59.999999'
+        return (first % value, second % value)
+    raise TypeError("Field has invalid lookup: %s" % lookup_type)
 
 QUERY_TERMS_MAPPING = {
     'exact': operator.eq, 
@@ -36,9 +55,9 @@ def _lookup_query_expression(lookup_type, field, value):
     elif lookup_type == 'iendswith':
         return curry(field.ilike, '%%%s' % value)
     elif lookup_type == 'range':
-        raise NotImplementedError()
+        return curry(field.between, *value)
     elif lookup_type == 'year':        
-        raise NotImplementedError()
+        return curry(field.between, *_get_range_lookup(lookup_type, value))
     elif lookup_type == 'month':
         raise NotImplementedError()
     elif lookup_type == 'day':

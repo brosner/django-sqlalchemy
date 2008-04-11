@@ -8,7 +8,7 @@ class Category(models.Model):
         return self.name
 
 class Post(models.Model):
-    created_at = models.DateTimeField(default=datetime.datetime.now)
+    created_at = models.DateField(default=datetime.date.today)
     category = models.ForeignKey(Category)
     body = models.TextField()
     is_draft = models.BooleanField(default=False)
