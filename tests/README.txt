@@ -72,3 +72,14 @@ to test different areas of functionality.
 
 * **norelations** - The norelations application is a very basic application
   that contains a single ``Person`` model.  It is the simplest of cases. 
+
+Included in the ``tests/apps`` directory is a ``manage.py`` module that can
+be used to test any of the test applications out in the shell, just like
+you normally would.  
+
+By default the ``settings.py`` module in that directory
+mimics the ``settings.py`` in the main ``tests`` directory with the exception
+that the database is set to a regular sqlite database.
+
+Please refrain from committing any temporary databases that you may create in
+the course of testing the applications.
