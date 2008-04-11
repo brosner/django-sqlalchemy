@@ -15,11 +15,9 @@ class TestIsNull(object):
             {'name': 'Ruby', 'slug': 'ruby', 'description': 'Spankin the monkey patch'}, 
             {'name': 'Smalltalk', 'slug': 'smalltalk', 'description': 'No symbol left unturned'}, 
             {'name': 'CSharp', 'slug': 'csharp'})
-        # FIXME: for some reason SA will override the create with the default 
-        # even if it's specified. I need to figure a way around this. It's 
-        # preferable to do setup through SA directly.
-        Category.objects.create(**{'name': 'Modula', 'slug': 'modula', 'active': False})
-        Category.objects.create(**{'name': 'Algol', 'slug': 'algol', 'active': False})
+        Category.__table__.insert().execute(
+            {'name': 'Modula', 'slug': 'modula', 'active': False},
+            {'name': 'Algol', 'slug': 'algol', 'active': False})
         # Category.__table__.insert().execute(
         #             {'name': 'Django', 'slug': 'django', 'description': 'For perfectionists', 'parent': 1}, 
         #             {'name': 'Pylons', 'slug': 'pylons', 'parent': 1}, 
