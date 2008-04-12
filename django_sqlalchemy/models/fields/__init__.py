@@ -24,7 +24,7 @@ class Field(models.Field):
         
         kwargs.update(self.sa_column_kwargs())
         
-        self.sa_column = Column(self.name, self.sa_column_type(), 
+        self.sa_column = Column(self.db_column or self.name, self.sa_column_type(), 
                 *self.sa_column_args(),
                 **kwargs)
         return self.sa_column

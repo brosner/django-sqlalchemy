@@ -102,9 +102,7 @@ class ForeignKey(models.ForeignKey, Field):
         if self.primary_key:
             kwargs["primary_key"] = True
         
-        self.sa_column = sa.Column('%s_%s' % (
-                            options.object_name.lower(),
-                            options.pk.name), 
+        self.sa_column = sa.Column(self.db_column or self.attname, 
                             options.pk.sa_column_type().__class__, 
                             sa.ForeignKey(fk_primary), **kwargs)
         self.sa_rel_column = self.relation or orm.relation(self.rel.to)
