@@ -22,8 +22,7 @@ class TestYear(object):
         c = Category.query.filter_by(name='Python').one()
         Post.__table__.insert().execute(
             {'id': 4, 'body': 'Why it is pronounced Jango and not DJ-Ango.', 'category_id': c.id, 'created_at': datetime.date(2008, 3, 5)})
-        # for some reason the SA way of doing it with insert doesn't respect my defaults. I need to investigate this
-        Post.objects.create(**{'id': 5, 'body': 'Intermediate Models - Will they ever happen?', 'category_id': c.id})
+        Post.__table__.insert().execute({'id': 5, 'body': 'Intermediate Models - Will they ever happen?', 'category_id': c.id})
 
     def test_should_find_all_values_in_year(self):
         posts = Post.objects.filter(created_at__year=2007).order_by('id')

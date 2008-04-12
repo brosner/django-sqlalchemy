@@ -6,16 +6,27 @@ from sqlalchemy import Column
 from sqlalchemy.orm import deferred, synonym
 from sqlalchemy.types import *
 
+from django_sqlalchemy import utils
+
 class Field(models.Field):
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):        
         self.sa_column = None
         models.Field.__init__(self, **kwargs)
     
     def create_column(self):
+        kwargs = dict(key=self.column, nullable=self.null,
+                index=self.db_index, unique=self.unique)
+        if self.default is not NOT_PROVIDED:
+            kwargs["default"] = self.default
+        if self.primary_key:
+            kwargs["primary_key"] = True
+        
+        kwargs.update(self.sa_column_kwargs())
+        
         self.sa_column = Column(self.name, self.sa_column_type(), 
                 *self.sa_column_args(),
-                **self.sa_column_kwargs())
+                **kwargs)
         return self.sa_column
         
     def sa_column_type(self):
@@ -24,30 +35,19 @@ class Field(models.Field):
     def sa_column_args(self):
         return tuple()
     
-    def sa_column_kwargs(self, **kwargs):
-        kw = dict(nullable=self.null,
-                  index=self.db_index, 
-                  unique=self.unique)
-        # sa expects an __init__ on class callables. 0.4.3 schema.py:811
-        if self.default is not NOT_PROVIDED:
-            kw["default"] = self.default
-        
-        if self.primary_key:
-            kw["primary_key"] = True
-        
-        # update with defaults where not specified
-        kwargs.update(kw)
-        return kwargs
-       
+    def sa_column_kwargs(self):        
+        return dict()
+    
 class AutoField(models.AutoField, Field):
     def __init__(self, *args, **kwargs):
         models.AutoField.__init__(self, *args, **kwargs)
         Field.__init__(self, *args, **kwargs)
         
-    def sa_column_kwargs(self, **kwargs):
-        kwargs.update(dict(primary_key=True))
-        super(AutoField, self).sa_column_kwargs(**kwargs)
-        return kwargs
+    def sa_column_kwargs(self):
+        kwargs = dict(primary_key=True)
+        base = super(AutoField, self).sa_column_kwargs()
+        base.update(kwargs)
+        return base
     
     def sa_column_type(self):
         return Integer()
@@ -79,6 +79,13 @@ class DateField(models.DateField, Field):
                                         auto_now_add=auto_now_add, **kwargs)
         Field.__init__(self, verbose_name=None, name=None, **kwargs)
     
+    def sa_column_kwargs(self):
+        # need to handle auto_now and auto_now_add
+        #kwargs = dict(primary_key=True)
+        base = super(DateField, self).sa_column_kwargs()
+        #base.update(kwargs)
+        return base
+    
     def sa_column_type(self):
         return Date()
 
@@ -97,10 +104,11 @@ class DecimalField(models.DecimalField, Field):
                                            decimal_places=kwargs.get('decimal_places', None), **kwargs)
         Field.__init__(self, *args, **kwargs)
     
-    def sa_column_kwargs(self, **kwargs):
-        kwargs.update(dict(precision=self.decimal_places, length=self.max_digits))
-        super(DecimalField, self).sa_column_kwargs(**kwargs)
-        return kwargs
+    def sa_column_kwargs(self):
+        kwargs = dict(precision=self.decimal_places, length=self.max_digits)
+        base = super(DecimalField, self).sa_column_kwargs()
+        base.update(kwargs)
+        return base
 
     def sa_column_type(self):
         return Numeric()
