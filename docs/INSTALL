@@ -1,5 +1,17 @@
-Requirements:
 
-SqlAlchemy 0.4.5 - http://pypi.python.org/pypi/SQLAlchemy/0.4.5
-Django "queryset-refactor" Branch - svn co http://code.djangoproject.com/svn/django/branches/queryset-refactor 
+django-sqlalchemy Installation
+==============================
 
+This document covers how-to get django-sqlalchemy up and running your project.
+
+Dependancies
+------------
+
+Make sure you have the following installed on your PYTHONPATH:
+
+    * sqlalchemy 0.4.5 -- http://pypi.python.org/pypi/SQLAlchemy/0.4.5
+    * django "queryset-refactor" -- svn co http://code.djangoproject.com/svn/django/branches/queryset-refactor 
+
+As of r7426 in the queryset-refactor branch has broken django-sqlalchemy. You
+might want to make sure you have a checkout prior to that changeset or wait
+until we fix it in our core.
