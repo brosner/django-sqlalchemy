@@ -2,7 +2,7 @@
 from django.db import models
 from django_sqlalchemy.models.query import SQLAlchemyQuerySet
 
-class SQLAlchemyManager(models.Manager):
+class Manager(models.Manager):
     """
     A custom Manager for using the SQLAlchemyQuerySet instead of the default
     one with Django.

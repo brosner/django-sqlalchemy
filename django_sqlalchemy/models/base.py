@@ -9,7 +9,7 @@ from sqlalchemy import util, exceptions
 
 from django_sqlalchemy.backend import metadata, Session
 from django_sqlalchemy.models import *
-from django_sqlalchemy.models.manager import SQLAlchemyManager
+from django_sqlalchemy.models.manager import Manager
 
 import types
 
@@ -44,7 +44,7 @@ class ModelBase(models.base.ModelBase):
         # apps that don't care about django-sqlachemy.
         if type(new_class._default_manager) is models.Manager:
             model = new_class._default_manager.model
-            new_class._default_manager = SQLAlchemyManager()
+            new_class._default_manager = Manager()
             new_class._default_manager.model = model
             new_class.objects = new_class._default_manager
         return new_class
