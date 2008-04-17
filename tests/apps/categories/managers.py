@@ -1,4 +1,5 @@
-from django.db import models
+
+from django_sqlalchemy import models
 
 class CategoryManager(models.Manager):
     def get_query_set(self):
