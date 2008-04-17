@@ -3,6 +3,7 @@
 >>> w_mark_felt = Source.objects.create(codename="Deep Throat")
 >>> watergate = Article()
 >>> watergate.content = "Nixon, um, spied on ppl!"
+>>> watergate.author = john_anderson
 >>> watergate.save()
 >>> watergate.sources.add(w_mark_felt)
 >>> watergate.save()

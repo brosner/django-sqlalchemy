@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.fields import NOT_PROVIDED
 from django_sqlalchemy.backend import metadata, Session
 from django_sqlalchemy.models import Field
 from django_sqlalchemy.models.related import WrappedDynaLoader
@@ -84,19 +85,26 @@ class ForeignKey(models.ForeignKey, Field):
     def create_column(self):
         # try to get the ForeignKey using the SA Column.  If it doesn't work 
         # then it's likely a self-referential situation and then just build
-        # up the quoted name.
+        # up the quoted name.        
         options = self.rel.to._meta
         
         try:
             fk_primary = list(self.rel.to.__table__.primary_key)[0]
         except:
             fk_primary = '%s.%s' % (options.db_table, options.pk.name)
+
+        #TODO: this should be refactored because the same logic is in the 
+        #      Field __init__
+        kwargs = dict(nullable=self.null,
+                      index=True, unique=self.unique)
+        if self.default is not NOT_PROVIDED:
+            kwargs["default"] = self.default
+        if self.primary_key:
+            kwargs["primary_key"] = True
         
-        self.sa_column = sa.Column('%s_%s' % (
-                            options.object_name.lower(),
-                            options.pk.name), 
+        self.sa_column = sa.Column(self.db_column or self.attname, 
                             options.pk.sa_column_type().__class__, 
-                            sa.ForeignKey(fk_primary))
+                            sa.ForeignKey(fk_primary), **kwargs)
         self.sa_rel_column = self.relation or orm.relation(self.rel.to)
         # self.sa_rel_column = self.relation or orm.relation(self.rel.to, 
         #                                           backref=orm.backref(self.related_name, 
