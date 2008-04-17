@@ -1,7 +1,7 @@
 
 def sa_queryset_factory(DefaultQuerySet):
     from django.db.models.sql.constants import ORDER_PATTERN
-    from django_sqlalchemy.backend import utils
+    from django_sqlalchemy.models import query_utils as utils
     
     class SQLAlchemyQuerySet(DefaultQuerySet):
         """
