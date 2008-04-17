@@ -10,7 +10,6 @@ except ImportError, e:
     raise ImproperlyConfigured("Error loading sqlalchemy module: %s" % e)
 
 from sqlalchemy.orm import scoped_session, sessionmaker
-from django_sqlalchemy.backend.query import sa_queryset_factory
 
 # We are implementing all fields as non unicode types.  We are then 
 # converting all strings to unicode in and out of all fields. 
@@ -29,14 +28,11 @@ DatabaseError = Exception
 IntegrityError = Exception
 
 class DatabaseFeatures(BaseDatabaseFeatures):
-    uses_custom_queryset = True
+    pass
 
 class DatabaseOperations(BaseDatabaseOperations):
     def quote_name(self, name):
         return metadata.bind.dialect.identifier_preparer.quote_identifier(name)
-    
-    def query_set_class(self, DefaultQuerySet):
-        return sa_queryset_factory(DefaultQuerySet)
 
 class ConnectionProxy(object):
     """

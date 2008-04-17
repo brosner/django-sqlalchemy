@@ -1,12 +1,16 @@
 
-from django_sqlalchemy.backend import metadata, Session
-from django_sqlalchemy.models import *
 from django.db import models
+
 from sqlalchemy.schema import Table, SchemaItem, Column, MetaData
 from sqlalchemy.orm import synonym as _orm_synonym, mapper, comparable_property
 from sqlalchemy.orm.interfaces import MapperProperty
 from sqlalchemy.orm.properties import PropertyLoader, ColumnProperty
 from sqlalchemy import util, exceptions
+
+from django_sqlalchemy.backend import metadata, Session
+from django_sqlalchemy.models import *
+from django_sqlalchemy.models.manager import SQLAlchemyManager
+
 import types
 
 __all__ = ['Model', 'ModelBase', 'synonym_for', 'comparable_using',
@@ -33,8 +37,17 @@ class ModelBase(models.base.ModelBase):
             # 'Model' isn't defined yet, meaning we're looking at Django's own
             # Model class, defined below.
             return type.__new__(cls, name, bases, attrs)
-        
-        return super(ModelBase, cls).__new__(cls, name, bases, attrs)
+        new_class = super(ModelBase, cls).__new__(cls, name, bases, attrs)
+        # HACK: this does not seem ideal. this is a fix for qs-rf r7426 which
+        # removed per-backend QuerySet classes. here we use a custom manager
+        # to use our queryset, but this is not nice to existing third party
+        # apps that don't care about django-sqlachemy.
+        if type(new_class._default_manager) is models.Manager:
+            model = new_class._default_manager.model
+            new_class._default_manager = SQLAlchemyManager()
+            new_class._default_manager.model = model
+            new_class.objects = new_class._default_manager
+        return new_class
     
     def __init__(cls, classname, bases, dict_):
         if hasattr(cls, "__table__"):
