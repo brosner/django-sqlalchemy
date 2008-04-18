@@ -72,6 +72,10 @@ class NoseDjangoSQLAlchemy(Plugin):
 
         # setup the test env for each test case
         setup_test_environment()
+        
+        # create the database
+        from django.core.management import call_command
+        call_command('syncdb')
             
     def beforeTest(self, test):
 
