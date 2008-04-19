@@ -205,7 +205,7 @@ class SlugField(models.SlugField, CharField):
         #FIXME: the metaclass for Fields gets called before the __init__ for
         #       SlugField, so the max_length fixup errors out before max_length
         #       has a chance to be set.  This problem occurs for all fields.
-        kwargs['max_length'] = kwargs.get('max_length', 50)        
+        kwargs['max_length'] = kwargs.pop('max_length', 50)        
         models.SlugField.__init__(self, *args, **kwargs)
         CharField.__init__(self, *args, **kwargs)
 
@@ -236,9 +236,10 @@ class TimeField(models.TimeField, Field):
 
 class URLField(models.URLField, CharField):
     def __init__(self, *args, **kwargs):
-        models.URLField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
-                                       name=kwargs.get('name', None), 
-                                       verify_exists=kwargs.get('verify_exists', True), **kwargs)
+        kwargs['max_length'] = kwargs.pop('max_length', 200)
+        models.URLField.__init__(self, verbose_name=kwargs.pop('verbose_name', None), 
+                                       name=kwargs.pop('name', None), 
+                                       verify_exists=kwargs.pop('verify_exists', True), **kwargs)
         CharField.__init__(self, *args, **kwargs)
 
 class USStateField(models.USStateField, Field):
