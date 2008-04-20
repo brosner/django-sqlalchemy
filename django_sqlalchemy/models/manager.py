@@ -9,3 +9,9 @@ class Manager(models.Manager):
     """
     def get_query_set(self):
         return SQLAlchemyQuerySet(self.model)
+
+    def first(self):
+        return self.get_query_set().first()
+
+    def options(self, *args):
+        return self.get_query_set().options(*args)
