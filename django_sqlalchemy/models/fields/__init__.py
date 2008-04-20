@@ -73,6 +73,7 @@ class CommaSeparatedIntegerField(models.CommaSeparatedIntegerField, CharField):
     
 class DateField(models.DateField, Field):
     def __init__(self, verbose_name=None, name=None, auto_now=False, auto_now_add=False, **kwargs):
+        self.onupdate = kwargs.pop('onupdate', None)
         models.DateField.__init__(self, verbose_name=verbose_name, 
                                         name=name, 
                                         auto_now=auto_now, 
@@ -81,9 +82,9 @@ class DateField(models.DateField, Field):
     
     def sa_column_kwargs(self):
         # need to handle auto_now and auto_now_add
-        #kwargs = dict(primary_key=True)
+        kwargs = dict(onupdate=self.onupdate)
         base = super(DateField, self).sa_column_kwargs()
-        #base.update(kwargs)
+        base.update(kwargs)
         return base
     
     def sa_column_type(self):
