@@ -18,8 +18,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI, convert_unicode=True)
 engine.echo = getattr(settings, 'DJANGO_SQLALCHEMY_ECHO', False)
 
-Session = scoped_session(sessionmaker(
-    bind=engine, transactional=True))
+Session = scoped_session(sessionmaker(bind=engine, transactional=True))
 
 # default metadata
 metadata = MetaData(bind=engine)
@@ -33,13 +32,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 class DatabaseOperations(BaseDatabaseOperations):
     def quote_name(self, name):
         return metadata.bind.dialect.identifier_preparer.quote_identifier(name)
-
-class ConnectionProxy(object):
-    """
-    Provides a proxy between what Django expects as a connection and SQLAlchemy.
-    """
-    def __init__(self, session, connection):
-        pass
 
 class DatabaseWrapper(BaseDatabaseWrapper):
     features = DatabaseFeatures()
