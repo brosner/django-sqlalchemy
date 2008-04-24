@@ -11,3 +11,24 @@ Make sure you have the following installed on your PYTHONPATH:
 
     * sqlalchemy 0.4.5 -- http://pypi.python.org/pypi/SQLAlchemy/0.4.5
     * django "queryset-refactor" r7426 or newer -- svn co http://code.djangoproject.com/svn/django/branches/queryset-refactor 
+
+Configuration
+-------------
+
+django-sqlalchemy depends on two settings that you need to put in your
+settings.py file:
+
+    * DATABASE_ENGINE
+    * DJANGO_SQLALCHEMY_DBURI
+
+``DATABASE_ENGINE`` must be set to ``django_sqlalchemy.backend``. This will
+tell Django to load up all of our stuff to use as the database backend.
+``DJANGO_SQLALCHEMY_DBURI`` is passed to SQLAlchemy's ``create_engine``. You
+may also optionally set ``DJANGO_SQLALCHEMY_ECHO`` to True to tell SQLAlchemy
+to be verbose. This is really only recommended during development only.
+
+Currently we require that all ``from django.db import models`` is changed to
+``from django_sqlalchemy import models``. We have mapped all Django's fields
+to their SQLAlchemy equivalents. We may eventually map this into Django or
+provide a solution a little bit more involved, but for right now to get
+things work we ask that this done by the user.
