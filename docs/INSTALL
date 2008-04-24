@@ -31,4 +31,4 @@ Currently we require that all ``from django.db import models`` is changed to
 ``from django_sqlalchemy import models``. We have mapped all Django's fields
 to their SQLAlchemy equivalents. We may eventually map this into Django or
 provide a solution a little bit more involved, but for right now to get
-things work we ask that this done by the user.
+things working we ask that this done by the user.
