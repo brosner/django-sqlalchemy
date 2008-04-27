@@ -166,7 +166,7 @@ class SQLAlchemyQuerySet(QuerySet):
         from django_sqlalchemy.models.query import SQLAlchemyValuesQuerySet
         return self._clone(klass=SQLAlchemyValuesQuerySet, setup=True, _fields=fields)
 
-    def valueslist(self, *fields, **kwargs):
+    def values_list(self, *fields, **kwargs):
         """
         Returns a list of tuples for each of the fields specified.  This
         works by wrapping the SQLAlchemyQuerySet in a 
