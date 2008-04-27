@@ -10,7 +10,7 @@ Dependancies
 Make sure you have the following installed on your PYTHONPATH:
 
     * sqlalchemy 0.4.5 -- http://pypi.python.org/pypi/SQLAlchemy/0.4.5
-    * django "queryset-refactor" r7426 or newer -- svn co http://code.djangoproject.com/svn/django/branches/queryset-refactor 
+    * django SVN r7477 or newer -- svn co http://code.djangoproject.com/svn/django/trunk
 
 Configuration
 -------------
