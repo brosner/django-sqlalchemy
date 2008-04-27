@@ -176,10 +176,10 @@ class SQLAlchemyQuerySet(QuerySet):
         """
         flat = kwargs.pop('flat', False)
         if kwargs:
-            raise TypeError('Unexpected keyword arguments to valueslist: %s'
+            raise TypeError('Unexpected keyword arguments to values_list: %s'
                     % (kwargs.keys(),))
         if flat and len(fields) > 1:
-            raise TypeError("'flat' is not valid when valueslist is called with more than one field.")
+            raise TypeError("'flat' is not valid when values_list is called with more than one field.")
         from django_sqlalchemy.models.query import SQLAlchemyValuesListQuerySet
         return self._clone(klass=SQLAlchemyValuesListQuerySet, setup=True, flat=flat,
                 _fields=fields)
