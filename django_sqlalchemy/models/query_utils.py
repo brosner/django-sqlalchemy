@@ -6,7 +6,7 @@ from django.utils.functional import curry
 from sqlalchemy.sql import func, desc, asc
 from django_sqlalchemy import utils
 
-def _get_range_lookup(lookup_type, value):
+def _get_range_lookup(lookup_type, field, value):
     if lookup_type == 'year':
         try:
             value = int(value)
@@ -57,7 +57,7 @@ def _lookup_query_expression(lookup_type, field, value):
     elif lookup_type == 'range':
         return curry(field.between, *value)
     elif lookup_type == 'year':        
-        return curry(field.between, *_get_range_lookup(lookup_type, value))
+        return curry(field.between, *_get_range_lookup(lookup_type, field, value))
     elif lookup_type == 'month':
         raise NotImplementedError()
     elif lookup_type == 'day':

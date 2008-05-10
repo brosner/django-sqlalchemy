@@ -9,11 +9,10 @@ from sqlalchemy import util, exceptions
 
 from django_sqlalchemy.backend import metadata, Session
 from django_sqlalchemy.models import *
-from django_sqlalchemy.models.manager import Manager
 
 import types
 
-__all__ = ['Model', 'ModelBase', 'synonym_for', 'comparable_using',
+__all__ = ['DjangoSQLAlchemyModel', 'DjangoSQLAlchemyModelBase', 'synonym_for', 'comparable_using',
            'declared_synonym']
 
 def is_base(cls):
@@ -23,30 +22,31 @@ def is_base(cls):
     the 'Model' class).
     """
     for base in cls.__bases__:
-        if isinstance(base, ModelBase):
+        if isinstance(base, DjangoSQLAlchemyModelBase):
             return False
     return True
 
-class ModelBase(models.base.ModelBase):
+class DjangoSQLAlchemyModelBase(models.base.ModelBase):
     def __new__(cls, name, bases, attrs):
         try:
-            parents = [b for b in bases if issubclass(b, Model)]
+            parents = [b for b in bases if issubclass(b, DjangoSQLAlchemyModel)]
             if not parents:
                 return type.__new__(cls, name, bases, attrs)
         except NameError:
-            # 'Model' isn't defined yet, meaning we're looking at Django's own
-            # Model class, defined below.
+            # 'DjangoSQLAlchemyModel' isn't defined yet, meaning we're looking 
+            # at Django-SQLAlchemy's own DjangoSQLAlchemyModel class, defined 
+            # below.
             return type.__new__(cls, name, bases, attrs)
-        new_class = super(ModelBase, cls).__new__(cls, name, bases, attrs)
+        new_class = super(DjangoSQLAlchemyModelBase, cls).__new__(cls, name, bases, attrs)
         # HACK: this does not seem ideal. this is a fix for qs-rf r7426 which
         # removed per-backend QuerySet classes. here we use a custom manager
         # to use our queryset, but this is not nice to existing third party
         # apps that don't care about django-sqlachemy.
-        if type(new_class._default_manager) is models.Manager:
-            model = new_class._default_manager.model
-            new_class._default_manager = Manager()
-            new_class._default_manager.model = model
-            new_class.objects = new_class._default_manager
+        # if type(new_class._default_manager) is models.Manager:
+        #             model = new_class._default_manager.model
+        #             new_class._default_manager = Manager()
+        #             new_class._default_manager.model = model
+        #             new_class.objects = new_class._default_manager
         return new_class
     
     def __init__(cls, classname, bases, dict_):
@@ -257,11 +257,11 @@ def _undefer_column_name(key, column):
     if column.name is None:
         column.name = key
 
-class Model(models.Model):
+class DjangoSQLAlchemyModel(object):
     '''
     The base class for all entities    
     '''
-    __metaclass__ = ModelBase
+    __metaclass__ = DjangoSQLAlchemyModelBase
     
     metadata = metadata
     _decl_class_registry = {}
@@ -272,7 +272,7 @@ class Model(models.Model):
                 raise TypeError('%r is an invalid keyword argument for %s' %
                                 (k, type(self).__name__))
             setattr(self, k, kwargs[k])
-        return super(Model, self).__init__(**kwargs)
+        return super(DjangoSQLAlchemyModel, self).__init__(**kwargs)
     
     def save(self):
         """
@@ -298,3 +298,10 @@ class Model(models.Model):
         obj = Session.delete(self)
         Session.commit()
         return obj
+
+from django_sqlalchemy.utils import MixIn
+
+def _patch():
+    """Patch Django's internals."""
+    MixIn(models.Model, DjangoSQLAlchemyModel)
+_patch()

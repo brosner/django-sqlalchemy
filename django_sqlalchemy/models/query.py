@@ -186,7 +186,7 @@ class SQLAlchemyQuerySet(QuerySet):
 
     def dates(self, field_name, kind, order='ASC'):
         """
-        TODO:need to map dates
+        TODO: Need to map dates
         Returns a list of datetime objects representing all available dates
         for the given field_name, scoped to 'kind'.
         """

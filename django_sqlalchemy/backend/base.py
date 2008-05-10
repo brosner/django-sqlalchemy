@@ -1,6 +1,7 @@
-
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseOperations, util
+from django_sqlalchemy import utils
 
 try:
     from sqlalchemy import create_engine, MetaData, exceptions
@@ -45,3 +46,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             from django.db.backends.sqlite3.base import SQLiteCursorWrapper
             kwargs['factory'] = SQLiteCursorWrapper
         return conn.connection.cursor(**kwargs)
+
+def get_sqlalchemy_backend():
+    """
+    Loads up the sqlalchemy specific backend overrides for Django.
+    """
+    try:        
+        _import_path = 'django_sqlalchemy.backend'
+        backend = __import__('%s%s' % (_import_path, utils.db_label), {}, {}, [''])
+    except ImportError, e:
+        raise ImproperlyConfigured, "%r isn't an available database backend." % utils.db_label

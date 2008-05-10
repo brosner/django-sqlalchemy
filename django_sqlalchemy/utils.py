@@ -1,3 +1,4 @@
+import types
 from django.conf import settings
 
 __all__ = 'parse_db_uri', 'db_url', 'db_label'
@@ -5,11 +6,31 @@ __all__ = 'parse_db_uri', 'db_url', 'db_label'
 def parse_db_uri():
     """
     Parse the dburi and pull out the full dburi and the label only
-    """
+    """    
     db_url = getattr(settings, 'DJANGO_SQLALCHEMY_DBURI', "sqlite://")
     db_label = db_url[:db_url.index(':')]
     return (db_url, db_label)
 db_url, db_label = parse_db_uri()
+
+def MixIn(klass, mixin, ancestor=False):
+   if ancestor:
+     if mixin not in klass.__bases__:
+        klass.__bases__ = (mixin,) + klass.__bases__
+   else:
+     # Recursively traverse the mix-in ancestor
+     # classes in order to support inheritance
+     bases = list(mixin.__bases__)
+     bases.reverse()
+     for base in bases:
+        MixIn(klass, base)
+     # Install the mix-in methods into the class
+     for name in dir(mixin):
+        if not name.startswith('__'):
+        # skip private members
+           member = getattr(mixin, name)
+           if type(member) is types.MethodType:
+               member = member.im_func
+           setattr(klass, name, member)
 
 class MethodContainer(object):
     pass
