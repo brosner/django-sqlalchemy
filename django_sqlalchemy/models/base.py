@@ -1,5 +1,5 @@
 
-from django.db import models
+from django.db.models.base import ModelBase, Model
 
 from sqlalchemy.schema import Table, SchemaItem, Column, MetaData
 from sqlalchemy.orm import synonym as _orm_synonym, mapper, comparable_property
@@ -26,7 +26,7 @@ def is_base(cls):
             return False
     return True
 
-class DjangoSQLAlchemyModelBase(models.base.ModelBase):
+class DjangoSQLAlchemyModelBase(ModelBase):
     def __new__(cls, name, bases, attrs):
         try:
             parents = [b for b in bases if issubclass(b, DjangoSQLAlchemyModel)]
@@ -257,7 +257,7 @@ def _undefer_column_name(key, column):
     if column.name is None:
         column.name = key
 
-class DjangoSQLAlchemyModel(object):
+class DjangoSQLAlchemyModel(Model):
     '''
     The base class for all entities    
     '''
@@ -266,13 +266,13 @@ class DjangoSQLAlchemyModel(object):
     metadata = metadata
     _decl_class_registry = {}
     
-    def __init__(self, **kwargs):
-        for k in kwargs:
-            if not hasattr(type(self), k):
-                raise TypeError('%r is an invalid keyword argument for %s' %
-                                (k, type(self).__name__))
-            setattr(self, k, kwargs[k])
-        return super(DjangoSQLAlchemyModel, self).__init__(**kwargs)
+    # def __init__(self, **kwargs):
+    #     for k in kwargs:
+    #         if not hasattr(type(self), k):
+    #             raise TypeError('%r is an invalid keyword argument for %s' %
+    #                             (k, type(self).__name__))
+    #         setattr(self, k, kwargs[k])
+    #     return super(DjangoSQLAlchemyModel, self).__init__(**kwargs)
     
     def save(self):
         """
@@ -303,5 +303,6 @@ from django_sqlalchemy.utils import MixIn
 
 def _patch():
     """Patch Django's internals."""
-    MixIn(models.Model, DjangoSQLAlchemyModel)
+    MixIn(ModelBase, DjangoSQLAlchemyModelBase)
+    MixIn(Model, DjangoSQLAlchemyModel)
 _patch()

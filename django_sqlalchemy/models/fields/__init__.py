@@ -8,11 +8,11 @@ from sqlalchemy.types import *
 
 from django_sqlalchemy import utils
 
-class Field(models.Field):
+class Field(object):
     
     def __init__(self, *args, **kwargs):        
         self.sa_column = None
-        models.Field.__init__(self, **kwargs)
+        # models.Field.__init__(self, **kwargs)
     
     def create_column(self):
         kwargs = dict(key=self.column, nullable=self.null,
@@ -37,8 +37,10 @@ class Field(models.Field):
     
     def sa_column_kwargs(self):        
         return dict()
-    
-class AutoField(models.AutoField, Field):
+
+utils.MixIn(models.Field, Field)    
+
+class AutoField(Field, models.AutoField):
     def __init__(self, *args, **kwargs):
         models.AutoField.__init__(self, *args, **kwargs)
         Field.__init__(self, *args, **kwargs)
@@ -52,6 +54,8 @@ class AutoField(models.AutoField, Field):
     def sa_column_type(self):
         return Integer()
 
+utils.MixIn(models.AutoField, AutoField)
+
 class BooleanField(models.BooleanField, Field):
     def __init__(self, *args, **kwargs):
         models.BooleanField.__init__(self, *args, **kwargs)
@@ -60,13 +64,12 @@ class BooleanField(models.BooleanField, Field):
     def sa_column_type(self):
         return Boolean()
     
-class CharField(models.CharField, Field):
-    def __init__(self, *args, **kwargs):
-        Field.__init__(self, *args, **kwargs)
-    
+class CharField(models.CharField):
     def sa_column_type(self):
         return String(length=self.max_length)
-        
+
+utils.MixIn(models.CharField, Field)
+
 class CommaSeparatedIntegerField(models.CommaSeparatedIntegerField, CharField):
     def __init__(self, *args, **kwargs):
         CharField.__init__(self, *args, **kwargs)

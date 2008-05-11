@@ -12,25 +12,24 @@ def parse_db_uri():
     return (db_url, db_label)
 db_url, db_label = parse_db_uri()
 
-def MixIn(klass, mixin, ancestor=False):
-   if ancestor:
-     if mixin not in klass.__bases__:
-        klass.__bases__ = (mixin,) + klass.__bases__
-   else:
-     # Recursively traverse the mix-in ancestor
-     # classes in order to support inheritance
-     bases = list(mixin.__bases__)
-     bases.reverse()
-     for base in bases:
-        MixIn(klass, base)
-     # Install the mix-in methods into the class
-     for name in dir(mixin):
-        if not name.startswith('__'):
-        # skip private members
-           member = getattr(mixin, name)
-           if type(member) is types.MethodType:
-               member = member.im_func
-           setattr(klass, name, member)
+def MixIn(klass, mixin, include_private=True, ancestor=False):
+    if ancestor:
+        if mixin not in klass.__bases__:
+            klass.__bases__ = (mixin,) + klass.__bases__
+    else:
+        # Recursively traverse the mix-in ancestor
+        # classes in order to support inheritance
+        bases = list(mixin.__bases__)
+        bases.reverse()
+        for base in bases:
+            MixIn(klass, base)
+        # Install the mix-in methods into the class
+        for name in dir(mixin):
+            if include_private and name in("__init__", "__metaclass__") or not name.startswith('__'):
+                member = getattr(mixin, name)
+                if type(member) is types.MethodType:
+                    member = member.im_func
+                setattr(klass, name, member)
 
 class MethodContainer(object):
     pass
