@@ -25,7 +25,7 @@ def MixIn(klass, mixin, include_private=True, ancestor=False):
             MixIn(klass, base)
         # Install the mix-in methods into the class
         for name in dir(mixin):
-            if include_private and name in("__init__", "__metaclass__") or not name.startswith('__'):
+            if include_private and name in ("__init__", "__metaclass__") or not name.startswith('__'):
                 member = getattr(mixin, name)
                 if type(member) is types.MethodType:
                     member = member.im_func

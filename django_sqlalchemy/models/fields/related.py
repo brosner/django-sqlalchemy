@@ -77,7 +77,7 @@ from sqlalchemy import orm
 #             manager.clear()
 #         manager.add(*value)
 
-class ForeignKey(models.ForeignKey, Field):
+class ForeignKey(Field):
     def __init__(self, to, *args, **kwargs):
         self.relation = kwargs.pop('relation', None)   
         models.ForeignKey.__init__(self, to, *args, **kwargs)
@@ -127,7 +127,7 @@ class ForeignKey(models.ForeignKey, Field):
         self.related = related
         self.related_name = related.get_accessor_name()
 
-class ManyToManyField(models.ManyToManyField, Field):
+class ManyToManyField(Field):
     def __init__(self, to, *args, **kwargs):
         super(self.__class__, self).__init__(to, *args, **kwargs)
 
