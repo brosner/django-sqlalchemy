@@ -1,5 +1,6 @@
 
 from django.db.models.base import ModelBase, Model
+from django.db.models import AutoField
 
 from sqlalchemy.schema import Table, SchemaItem, Column, MetaData
 from sqlalchemy.orm import synonym as _orm_synonym, mapper, comparable_property
@@ -27,27 +28,28 @@ def is_base(cls):
     return True
 
 class DjangoSQLAlchemyModelBase(ModelBase):
-    def __new__(cls, name, bases, attrs):
-        try:
-            parents = [b for b in bases if issubclass(b, DjangoSQLAlchemyModel)]
-            if not parents:
-                return type.__new__(cls, name, bases, attrs)
-        except NameError:
-            # 'DjangoSQLAlchemyModel' isn't defined yet, meaning we're looking 
-            # at Django-SQLAlchemy's own DjangoSQLAlchemyModel class, defined 
-            # below.
-            return type.__new__(cls, name, bases, attrs)
-        new_class = super(DjangoSQLAlchemyModelBase, cls).__new__(cls, name, bases, attrs)
-        # HACK: this does not seem ideal. this is a fix for qs-rf r7426 which
-        # removed per-backend QuerySet classes. here we use a custom manager
-        # to use our queryset, but this is not nice to existing third party
-        # apps that don't care about django-sqlachemy.
-        # if type(new_class._default_manager) is models.Manager:
-        #             model = new_class._default_manager.model
-        #             new_class._default_manager = Manager()
-        #             new_class._default_manager.model = model
-        #             new_class.objects = new_class._default_manager
-        return new_class
+    __metaclass__ = ClassReplacer(ModelBase)
+    # def __new__(cls, name, bases, attrs):
+    #     try:
+    #         parents = [b for b in bases if issubclass(b, DjangoSQLAlchemyModel)]
+    #         if not parents:
+    #             return type.__new__(cls, name, bases, attrs)
+    #     except NameError:
+    #         # 'DjangoSQLAlchemyModel' isn't defined yet, meaning we're looking 
+    #         # at Django-SQLAlchemy's own DjangoSQLAlchemyModel class, defined 
+    #         # below.
+    #         return type.__new__(cls, name, bases, attrs)
+    #     new_class = super(DjangoSQLAlchemyModelBase, cls).__new__(cls, name, bases, attrs)
+    #     # HACK: this does not seem ideal. this is a fix for qs-rf r7426 which
+    #     # removed per-backend QuerySet classes. here we use a custom manager
+    #     # to use our queryset, but this is not nice to existing third party
+    #     # apps that don't care about django-sqlachemy.
+    #     # if type(new_class._default_manager) is models.Manager:
+    #     #             model = new_class._default_manager.model
+    #     #             new_class._default_manager = Manager()
+    #     #             new_class._default_manager.model = model
+    #     #             new_class.objects = new_class._default_manager
+    #     return new_class
     
     def __init__(cls, classname, bases, dict_):
         if hasattr(cls, "__table__"):
@@ -79,10 +81,10 @@ class DjangoSQLAlchemyModelBase(ModelBase):
         # Django will *always* have set the pk before we get here. Check if
         # it is a Django AutoField so we can override it with our own. This
         # will allow for a custom primary key to just work.
-        if isinstance(cls._meta.pk, models.AutoField):
+        if isinstance(cls._meta.pk, AutoField):
             # we need to add in the django-sqlalchemy version of the AutoField
             # because the one that Django adds will not work for our purposes.
-            auto_field = AutoField(verbose_name='ID', primary_key=True, auto_created=True)
+            auto_field = DSAutoField(verbose_name='ID', primary_key=True, auto_created=True)
             # this might seem redundant but without it the name is not set 
             # for SA
             auto_field.name = "id"
@@ -93,7 +95,7 @@ class DjangoSQLAlchemyModelBase(ModelBase):
             # AutoField.
             cls._meta.pk = auto_field
             for i, field in enumerate(cls._meta.fields):
-                if isinstance(field, models.AutoField):
+                if isinstance(field, AutoField):
                     cls._meta.fields[i] = auto_field
         for field in cls._meta.fields + cls._meta.many_to_many:
             sa_field = field.create_column()
@@ -303,6 +305,6 @@ from django_sqlalchemy.utils import MixIn
 
 def _patch():
     """Patch Django's internals."""
-    MixIn(ModelBase, DjangoSQLAlchemyModelBase)
+    # MixIn(ModelBase, DjangoSQLAlchemyModelBase)
     MixIn(Model, DjangoSQLAlchemyModel)
 _patch()

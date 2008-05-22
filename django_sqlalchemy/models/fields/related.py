@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.fields import NOT_PROVIDED
 from django_sqlalchemy.backend import metadata, Session
-from django_sqlalchemy.models import Field
+from django_sqlalchemy.models import DSField
 from django_sqlalchemy.models.related import WrappedDynaLoader
 
 import sqlalchemy as sa
@@ -77,7 +77,7 @@ from sqlalchemy import orm
 #             manager.clear()
 #         manager.add(*value)
 
-class ForeignKey(Field):
+class DSForeignKey(DSField):
     def __init__(self, to, *args, **kwargs):
         self.relation = kwargs.pop('relation', None)   
         models.ForeignKey.__init__(self, to, *args, **kwargs)
@@ -127,7 +127,7 @@ class ForeignKey(Field):
         self.related = related
         self.related_name = related.get_accessor_name()
 
-class ManyToManyField(Field):
+class DSManyToManyField(DSField):
     def __init__(self, to, *args, **kwargs):
         super(self.__class__, self).__init__(to, *args, **kwargs)
 

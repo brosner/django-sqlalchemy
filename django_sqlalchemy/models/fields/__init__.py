@@ -1,7 +1,6 @@
-from django.db import models
+from django.db import models as dmodels
 from django.db.models.fields import NOT_PROVIDED
 from django.conf import settings
-from django.utils.maxlength import LegacyMaxlength
 
 from sqlalchemy import Column
 from sqlalchemy.orm import deferred, synonym
@@ -9,18 +8,9 @@ from sqlalchemy.types import *
 
 from django_sqlalchemy import utils
 
-class KillTheFInMaxLength(LegacyMaxlength):
-    def __init__(cls, name, bases, attrs):
-        pass
+class DSField(dmodels.Field):
+    sa_column = None
 
-    
-class Field(models.Field):
-    __metaclass__ = KillTheFInMaxLength
-    
-    # def __init__(self, *args, **kwargs):        
-    #     self.sa_column = None
-    #     models.Field.__init__(self, **kwargs)
-        
     def create_column(self):
         kwargs = dict(key=self.column, nullable=self.null,
                 index=self.db_index, unique=self.unique)
@@ -45,26 +35,26 @@ class Field(models.Field):
     def sa_column_kwargs(self):        
         return dict()
 
-utils.MixIn(models.Field, Field)    
-utils.MixIn(LegacyMaxlength, KillTheFInMaxLength)    
+utils.MixIn(dmodels.Field, DSField, include_private=False)
 
-class AutoField(models.AutoField, Field):
+class DSAutoField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.AutoField)
+    
     def __init__(self, *args, **kwargs):
-        models.AutoField.__init__(self, *args, **kwargs)
-        Field.__init__(self, *args, **kwargs)
-
+        self._original.__init__(self, *args, **kwargs)
+    
     def sa_column_kwargs(self):
         kwargs = dict(primary_key=True)
-        base = super(AutoField, self).sa_column_kwargs()
+        base = super(DSAutoField, self).sa_column_kwargs()
         base.update(kwargs)
         return base
     
     def sa_column_type(self):
         return Integer()
 
-utils.MixIn(models.AutoField, AutoField)
+class DSBooleanField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.BooleanField)
 
-class BooleanField(Field):
     def __init__(self, *args, **kwargs):
         models.BooleanField.__init__(self, *args, **kwargs)
         Field.__init__(self, *args, **kwargs)
@@ -72,17 +62,21 @@ class BooleanField(Field):
     def sa_column_type(self):
         return Boolean()
     
-class CharField(models.CharField):
+class DSCharField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.CharField)
+    
     def sa_column_type(self):
         return String(length=self.max_length)
 
-utils.MixIn(models.CharField, Field)
+class DSCommaSeparatedIntegerField(dmodels.CharField, DSCharField):
+    __metaclass__ = utils.ClassReplacer(dmodels.CommaSeparatedIntegerField)
 
-class CommaSeparatedIntegerField(CharField):
     def __init__(self, *args, **kwargs):
         CharField.__init__(self, *args, **kwargs)
     
-class DateField(Field):
+class DSDateField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.DateField)
+
     def __init__(self, verbose_name=None, name=None, auto_now=False, auto_now_add=False, **kwargs):
         self.onupdate = kwargs.pop('onupdate', None)
         models.DateField.__init__(self, verbose_name=verbose_name, 
@@ -94,21 +88,25 @@ class DateField(Field):
     def sa_column_kwargs(self):
         # need to handle auto_now and auto_now_add
         kwargs = dict(onupdate=self.onupdate)
-        base = super(DateField, self).sa_column_kwargs()
+        base = super(DSDateField, self).sa_column_kwargs()
         base.update(kwargs)
         return base
     
     def sa_column_type(self):
         return Date()
 
-class DateTimeField(DateField):
+class DSDateTimeField(dmodels.DateField, DSDateField):
+    __metaclass__ = utils.ClassReplacer(dmodels.DateTimeField)
+
     def __init__(self, *args, **kwargs):
         DateField.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
         return DateTime()
 
-class DecimalField(Field):
+class DSDecimalField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.DecimalField)
+
     def __init__(self, *args, **kwargs):
         models.DecimalField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
                                            name=kwargs.get('name', None), 
@@ -118,19 +116,23 @@ class DecimalField(Field):
     
     def sa_column_kwargs(self):
         kwargs = dict(precision=self.decimal_places, length=self.max_digits)
-        base = super(DecimalField, self).sa_column_kwargs()
+        base = super(DSDecimalField, self).sa_column_kwargs()
         base.update(kwargs)
         return base
 
     def sa_column_type(self):
         return Numeric()
 
-class EmailField(CharField):
+class DSEmailField(dmodels.CharField, DSCharField):
+    __metaclass__ = utils.ClassReplacer(dmodels.EmailField)
+
     def __init__(self, *args, **kwargs):
         models.EmailField.__init__(self,  *args, **kwargs)
         CharField.__init__(self, *args, **kwargs)
     
-class FileField(Field):
+class DSFileField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.FileField)
+
     def __init__(self, *args, **kwargs):
         models.FileField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
                                         name=kwargs.get('name', None), 
@@ -140,7 +142,9 @@ class FileField(Field):
     def sa_column_type(self):
         return String(length=self.max_length)
 
-class FilePathField(Field):
+class DSFilePathField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.FilePathField)
+
     def __init__(self, *args, **kwargs):
         models.FilePathField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
                                             name=kwargs.get('name', None), 
@@ -152,14 +156,18 @@ class FilePathField(Field):
     def sa_column_type(self):
         return String(length=self.max_length)
 
-class FloatField(Field):
+class DSFloatField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.FloatField)
+
     def __init__(self, *args, **kwargs):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
         return Float()
 
-class ImageField(FileField):
+class DSImageField(dmodels.FileField, DSFileField):
+    __metaclass__ = utils.ClassReplacer(dmodels.ImageField)
+
     def __init__(self, *args, **kwargs):
         models.ImageField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
                                         name=kwargs.get('name', None), 
@@ -167,21 +175,27 @@ class ImageField(FileField):
                                         height_field=kwargs.get('height_field', None), **kwargs)
         FileField.__init__(self, *args, **kwargs)
 
-class IntegerField(Field):
+class DSIntegerField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.IntegerField)
+
     def __init__(self, *args, **kwargs):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
         return Integer()
 
-class IPAddressField(Field):
+class DSIPAddressField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.IPAddressField)
+
     def __init__(self, *args, **kwargs):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
         return String(length=self.max_length)
 
-class NullBooleanField(Field):
+class DSNullBooleanField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.NullBooleanField)
+
     def __init__(self, *args, **kwargs):
         models.NullBooleanField.__init__(self, *args, **kwargs)
         Field.__init__(self, *args, **kwargs)
@@ -189,7 +203,9 @@ class NullBooleanField(Field):
     def sa_column_type(self):
         return Boolean()
 
-class PhoneNumberField(IntegerField):
+class DSPhoneNumberField(dmodels.IntegerField, DSIntegerField):
+    __metaclass__ = utils.ClassReplacer(dmodels.PhoneNumberField)
+
     def __init__(self, *args, **kwargs):
         IntegerField.__init__(self, *args, **kwargs)
     
@@ -201,18 +217,24 @@ class PhoneNumberField(IntegerField):
         '''
         return String(length=20)
 
-class PositiveIntegerField(IntegerField):
+class DSPositiveIntegerField(dmodels.IntegerField, DSIntegerField):
+    __metaclass__ = utils.ClassReplacer(dmodels.PositiveIntegerField)
+
     def __init__(self, *args, **kwargs):
         IntegerField.__init__(self, *args, **kwargs)
 
-class PositiveSmallIntegerField(IntegerField):
+class DSPositiveSmallIntegerField(dmodels.IntegerField, DSIntegerField):
+    __metaclass__ = utils.ClassReplacer(dmodels.PositiveSmallIntegerField)
+
     def __init__(self, *args, **kwargs):
         IntegerField.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
         return SmallInteger()
 
-class SlugField(CharField):
+class DSSlugField(dmodels.CharField, DSCharField):
+    __metaclass__ = utils.ClassReplacer(dmodels.SlugField)
+
     def __init__(self, *args, **kwargs):
         #FIXME: the metaclass for Fields gets called before the __init__ for
         #       SlugField, so the max_length fixup errors out before max_length
@@ -221,21 +243,27 @@ class SlugField(CharField):
         models.SlugField.__init__(self, *args, **kwargs)
         CharField.__init__(self, *args, **kwargs)
 
-class SmallIntegerField(IntegerField):
+class DSSmallIntegerField(dmodels.IntegerField, DSIntegerField):
+    __metaclass__ = utils.ClassReplacer(dmodels.SmallIntegerField)
+
     def __init__(self, *args, **kwargs):
         IntegerField.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
         return SmallInteger()
 
-class TextField(Field):
+class DSTextField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.TextField)
+
     def __init__(self, *args, **kwargs):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
         return Text()
 
-class TimeField(Field):
+class DSTimeField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.TimeField)
+
     def __init__(self, *args, **kwargs):
         models.TimeField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
                                         name=kwargs.get('name', None), 
@@ -246,7 +274,9 @@ class TimeField(Field):
     def sa_column_type(self):
         return Time()
 
-class URLField(CharField):
+class DSURLField(dmodels.CharField, DSCharField):
+    __metaclass__ = utils.ClassReplacer(dmodels.URLField)
+
     def __init__(self, *args, **kwargs):
         kwargs['max_length'] = kwargs.pop('max_length', 200)
         models.URLField.__init__(self, verbose_name=kwargs.pop('verbose_name', None), 
@@ -254,21 +284,27 @@ class URLField(CharField):
                                        verify_exists=kwargs.pop('verify_exists', True), **kwargs)
         CharField.__init__(self, *args, **kwargs)
 
-class USStateField(Field):
+class DSUSStateField(dmodels.Field, DSField):
+    __metaclass__ = utils.ClassReplacer(dmodels.USStateField)
+
     def __init__(self, *args, **kwargs):
         Field.__init__(self, *args, **kwargs)
     
     def sa_column_type(self):
         return String(length=2)
 
-class XMLField(TextField):
+class DSXMLField(dmodels.TextField, DSTextField):
+    __metaclass__ = utils.ClassReplacer(dmodels.XMLField)
+
     def __init__(self, *args, **kwargs):
         models.XMLField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
                                        name=kwargs.get('name', None), 
                                        schema_path=kwargs.get('schema_path', None), **kwargs)
         TextField.__init__(self, *args, **kwargs)
 
-class OrderingField(IntegerField):
+class DSOrderingField(dmodels.IntegerField, DSIntegerField):
+    __metaclass__ = utils.ClassReplacer(dmodels.OrderingField)
+
     def __init__(self, *args, **kwargs):
         OrderingField.__init__(self, *args, **kwargs)
         IntegerField.__init__(self, *args, **kwargs)

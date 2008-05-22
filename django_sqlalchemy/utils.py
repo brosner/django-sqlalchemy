@@ -22,10 +22,12 @@ def MixIn(klass, mixin, include_private=True, ancestor=False):
         bases = list(mixin.__bases__)
         bases.reverse()
         for base in bases:
-            MixIn(klass, base)
+            MixIn(klass, base, include_private, ancestor)
         # Install the mix-in methods into the class
         for name in dir(mixin):
-            if include_private and name in ("__init__", "__metaclass__") or not name.startswith('__'):
+            if name in ("__class__", "__bases__", "__module__", "__dict__"):
+                continue
+            if include_private and name in ("__init__", "__new__", "__metaclass__") or not name.startswith('__'):
                 member = getattr(mixin, name)
                 if type(member) is types.MethodType:
                     member = member.im_func
@@ -34,60 +36,7 @@ def MixIn(klass, mixin, include_private=True, ancestor=False):
 class MethodContainer(object):
     pass
 
-class ClassReplacer(object):
-    """
-    Acts as a metaclass to replace the given class with the metaclass class.
-    An improved version originally found in the sadjango project.
-    
-    Create the base metaclass and base class.
-    
-    >>> class BaseMetaclass(type):
-    ...     def __new__(cls, name, bases, attrs):
-    ...         print "BaseMetaclass.__new__ called"
-    ...         return super(BaseMetaclass, cls).__new__(cls, name, bases, attrs)
-
-    >>> class BaseClass(object):
-    ...     __metaclass__ = BaseMetaclass
-    ...
-    ...     def __init__(self):
-    ...         print "BaseClass.__init__ called"
-    ...
-    ...     def method1(self):
-    ...         print "BaseClass.method1 called"
-    BaseMetaclass.__new__ called
-    
-    >>> baseclass_instance = BaseClass()
-    BaseClass.__init__ called
-    >>> baseclass_instance.method1()
-    BaseClass.method1 called
-    
-    >>> class MyMetaclass(type):
-    ...     __metaclass__ = ClassReplacer(BaseMetaclass)
-    ...     def __new__(cls, name, bases, attrs):
-    ...         print "MyMetaclass.__new__ called"
-    ...         return self._original.__new__(cls, name, bases, attrs)
-    
-    >>> class MyClass(object):
-    ...     __metaclass__ = ClassReplacer(BaseClass)
-    ...     
-    ...     def __init__(self):
-    ...         print "MyClass.__init__ called"
-    ...         self._original.__init__(self)
-    ...     
-    ...     def method2(self):
-    ...         print "MyClass.method2 called"
-    MyMetaclass.__new__ called
-    BaseMetaclass.__new__ called
-    
-    >>> myclass_instance = MyClass()
-    MyClass.__init__ called
-    BaseClass.__init__ called
-    >>> myclass_instance.method2()
-    MyClass.method2 called
-    >>> myclass_instance.method1()
-    BaseClass.method1 called
-    """
-    
+class ClassReplacer(object):    
     def __init__(self, klass, metaclass=None):
         self.klass = klass
         self.metaclass = metaclass
@@ -106,12 +55,3 @@ class ClassReplacer(object):
                 # add the attribute to the original class
                 setattr(self.klass, n, v)
         return self.klass
-
-
-
-def _test():
-    import doctest
-    doctest.testmod()
-
-if __name__ == "__main__":
-    _test()
