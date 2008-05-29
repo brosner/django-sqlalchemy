@@ -19,7 +19,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 engine = create_engine(settings.DJANGO_SQLALCHEMY_DBURI, convert_unicode=True)
 engine.echo = getattr(settings, 'DJANGO_SQLALCHEMY_ECHO', False)
 
-Session = scoped_session(sessionmaker(bind=engine, transactional=True))
+Session = scoped_session(sessionmaker(bind=engine, autocommit=False))
 
 # default metadata
 metadata = MetaData(bind=engine)

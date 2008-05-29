@@ -6,7 +6,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(default=datetime.datetime.now)
     
-    class Meta(object):
+    class Meta:
         verbose_name = 'blah'
     
     def __unicode__(self):

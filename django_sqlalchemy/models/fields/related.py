@@ -1,8 +1,10 @@
 from django.db import models
 from django.db.models.fields import NOT_PROVIDED
+from django.db.models.fields.related import ForeignRelatedObjectsDescriptor
 from django_sqlalchemy.backend import metadata, Session
 from django_sqlalchemy.models import DSField
 from django_sqlalchemy.models.related import WrappedDynaLoader
+from django_sqlalchemy import utils
 
 import sqlalchemy as sa
 from sqlalchemy import orm 
@@ -77,10 +79,12 @@ from sqlalchemy import orm
 #             manager.clear()
 #         manager.add(*value)
 
-class DSForeignKey(DSField):
+class DSForeignKey(models.ForeignKey, DSField):
+    __metaclass__ = utils.ClassReplacer(models.ForeignKey)
+
     def __init__(self, to, *args, **kwargs):
         self.relation = kwargs.pop('relation', None)   
-        models.ForeignKey.__init__(self, to, *args, **kwargs)
+        self._original.__init__(self, to, *args, **kwargs)
     
     def create_column(self):
         # try to get the ForeignKey using the SA Column.  If it doesn't work 
@@ -123,16 +127,15 @@ class DSForeignKey(DSField):
     def contribute_to_related_class(self, cls, related):
         # fk field needs to know the related_name it belongs to 
         # for create_column to work properly.
-        super(ForeignKey, self).contribute_to_related_class(cls, related)
+        self._original.contribute_to_related_class(self, cls, related)
         self.related = related
         self.related_name = related.get_accessor_name()
 
-class DSManyToManyField(DSField):
-    def __init__(self, to, *args, **kwargs):
-        super(self.__class__, self).__init__(to, *args, **kwargs)
+class DSManyToManyField(models.ManyToManyField, DSField):
+    __metaclass__ = utils.ClassReplacer(models.ManyToManyField)
 
     def add(self, *args, **kwargs):
-        super(self.__class__, self).add(self, *args, **kwargs)
+        self._original.add(self, *args, **kwargs)
         Session.commit()
     
     def create_column(self):
@@ -144,8 +147,7 @@ class DSManyToManyField(DSField):
         return self.sa_column
     
     def contribute_to_class(self, cls, name):
-        super(ManyToManyField, self).contribute_to_class(cls, name)
+        self._original.contribute_to_class(self, cls, name)
         # m2m field needs to know the model it belongs to for create_column
         # to work properly.
         self.model = cls
-    
