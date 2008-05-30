@@ -1,5 +1,4 @@
-
-from django_sqlalchemy import models
+from django.db import models
 
 class Tag(models.Model):
     tag = models.CharField(max_length=10, primary_key=True)

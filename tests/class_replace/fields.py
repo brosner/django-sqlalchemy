@@ -139,6 +139,11 @@ class AutoField(Field):
         """docstring for method4"""
         print "AutoField.method4"
 
+class AutoField2(AutoField):
+    def __init__(self, *args, **kwargs):
+        print "In AutoField2.__init__"        
+        Field.__init__(self, *args, **kwargs)
+
 ######################################################################################################
 
 class MyField(Field):
@@ -160,7 +165,7 @@ class MyField(Field):
 
 MixIn(Field, MyField, include_private=False)
 
-class MyAutoField(MyField, Field):
+class MyAutoField(MyField, AutoField):
     __metaclass__ = ClassReplacer(AutoField)
     
     def __init__(self, *args, **kwargs):
@@ -174,10 +179,18 @@ class MyAutoField(MyField, Field):
         """docstring for method4"""
         print "MyAutoField.method4"
 
+class MyAutoField2(MyAutoField, AutoField2):
+    __metaclass__ = ClassReplacer(AutoField2)
+    
+    # def __init__(self, *args, **kwargs):
+    #     print "In MyAutoField2.__init__"
+    #     self._original.__init__(self, *args, **kwargs)
+
 # MixIn(AutoField, MyAutoField, ancestor=True)
 a = AutoField()
-b = AutoField()
-b.sa_column = 4
+# b = AutoField()
+# c = AutoField2()
+# b.sa_column = 4
 
 # MixIn(ModelBase, MyModelBase)
 # MixIn(Model, MyModel)

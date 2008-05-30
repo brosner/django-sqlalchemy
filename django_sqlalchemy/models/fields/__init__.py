@@ -145,11 +145,11 @@ class DSFloatField(models.Field, DSField):
 class DSImageField(models.FileField, DSFileField):
     __metaclass__ = utils.ClassReplacer(models.ImageField)
 
-    def __init__(self, *args, **kwargs):
-        self._original.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
-                                        name=kwargs.get('name', None), 
-                                        width_field=kwargs.get('width_field', ''), 
-                                        height_field=kwargs.get('height_field', None), **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     self._original.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
+    #                                     name=kwargs.get('name', None), 
+    #                                     width_field=kwargs.get('width_field', ''), 
+    #                                     height_field=kwargs.get('height_field', None), **kwargs)
 
 class DSIntegerField(models.Field, DSField):
     __metaclass__ = utils.ClassReplacer(models.IntegerField)
@@ -192,12 +192,12 @@ class DSPositiveSmallIntegerField(models.IntegerField, DSIntegerField):
 class DSSlugField(models.CharField, DSCharField):
     __metaclass__ = utils.ClassReplacer(models.SlugField)
 
-    def __init__(self, *args, **kwargs):
-        #FIXME: the metaclass for Fields gets called before the __init__ for
-        #       SlugField, so the max_length fixup errors out before max_length
-        #       has a chance to be set.  This problem occurs for all fields.
-        kwargs['max_length'] = kwargs.pop('max_length', 50)        
-        self._original.SlugField.__init__(self, *args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     #FIXME: the metaclass for Fields gets called before the __init__ for
+    #     #       SlugField, so the max_length fixup errors out before max_length
+    #     #       has a chance to be set.  This problem occurs for all fields.
+    #     # kwargs['max_length'] = kwargs.pop('max_length', 50)
+    #     self._original.__init__(self, *args, **kwargs)
 
 class DSSmallIntegerField(models.IntegerField, DSIntegerField):
     __metaclass__ = utils.ClassReplacer(models.SmallIntegerField)
@@ -226,11 +226,11 @@ class DSTimeField(models.Field, DSField):
 class DSURLField(models.CharField, DSCharField):
     __metaclass__ = utils.ClassReplacer(models.URLField)
 
-    def __init__(self, *args, **kwargs):
-        kwargs['max_length'] = kwargs.pop('max_length', 200)
-        self._original.__init__(self, verbose_name=kwargs.pop('verbose_name', None), 
-                                       name=kwargs.pop('name', None), 
-                                       verify_exists=kwargs.pop('verify_exists', True), **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     kwargs['max_length'] = kwargs.pop('max_length', 200)
+    #     self._original.__init__(self, verbose_name=kwargs.pop('verbose_name', None), 
+    #                                    name=kwargs.pop('name', None), 
+    #                                    verify_exists=kwargs.pop('verify_exists', True), **kwargs)
 
 class DSUSStateField(models.Field, DSField):
     __metaclass__ = utils.ClassReplacer(models.USStateField)
@@ -241,10 +241,10 @@ class DSUSStateField(models.Field, DSField):
 class DSXMLField(models.TextField, DSTextField):
     __metaclass__ = utils.ClassReplacer(models.XMLField)
 
-    def __init__(self, *args, **kwargs):
-        self._original.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
-                                       name=kwargs.get('name', None), 
-                                       schema_path=kwargs.get('schema_path', None), **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     self._original.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
+    #                                    name=kwargs.get('name', None), 
+    #                                    schema_path=kwargs.get('schema_path', None), **kwargs)
 
 class DSOrderingField(models.IntegerField, DSIntegerField):
     __metaclass__ = utils.ClassReplacer(models.OrderingField)

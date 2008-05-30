@@ -1,5 +1,5 @@
 from django.template.defaultfilters import slugify
-from django_sqlalchemy import models
+from django.db import models
 import managers
 
 class Category(models.Model):

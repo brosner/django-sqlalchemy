@@ -1,6 +1,5 @@
 from django.db import models
 from django.db.models.fields import NOT_PROVIDED
-from django.db.models.fields.related import ForeignRelatedObjectsDescriptor
 from django_sqlalchemy.backend import metadata, Session
 from django_sqlalchemy.models import DSField
 from django_sqlalchemy.models.related import WrappedDynaLoader

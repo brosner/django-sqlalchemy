@@ -11,9 +11,9 @@ DJANGO_SQLALCHEMY_ECHO = True
 INSTALLED_APPS = (
     'django_sqlalchemy',
     'apps.blog',
-    # 'apps.news',
-    # 'apps.norelations',
-    # 'apps.categories',
+    'apps.news',
+    'apps.norelations',
+    'apps.categories',
     )
 
 TEMPLATE_LOADERS = (

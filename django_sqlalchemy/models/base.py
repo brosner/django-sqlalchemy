@@ -348,7 +348,7 @@ class DjangoSQLAlchemyModel(object):
         Save the current instance. We force a flush so it mimics Django's 
         behavior.
         """
-        obj = Session.save_or_update(self)
+        obj = Session.add(self)
         Session.commit()
         return obj
     
@@ -356,7 +356,7 @@ class DjangoSQLAlchemyModel(object):
         """
         Updates direct against the database
         """
-        obj = Session.update(self, *args, **kwargs)
+        obj = Session.add(self, *args, **kwargs)
         Session.commit()
         return obj
         
