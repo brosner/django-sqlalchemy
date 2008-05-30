@@ -9,7 +9,7 @@ Dependancies
 
 Make sure you have the following installed on your PYTHONPATH:
 
-    * sqlalchemy 0.4.5 -- http://pypi.python.org/pypi/SQLAlchemy/0.4.5
+    * sqlalchemy 0.5 SVN -- svn co http://svn.sqlalchemy.org/sqlalchemy/trunk
     * django SVN r7477 or newer -- svn co http://code.djangoproject.com/svn/django/trunk
 
 Configuration
@@ -26,9 +26,3 @@ tell Django to load up all of our stuff to use as the database backend.
 ``DJANGO_SQLALCHEMY_DBURI`` is passed to SQLAlchemy's ``create_engine``. You
 may also optionally set ``DJANGO_SQLALCHEMY_ECHO`` to True to tell SQLAlchemy
 to be verbose. This is really only recommended during development only.
-
-Currently we require that all ``from django.db import models`` is changed to
-``from django_sqlalchemy import models``. We have mapped all Django's fields
-to their SQLAlchemy equivalents. We may eventually map this into Django or
-provide a solution a little bit more involved, but for right now to get
-things working we ask that this done by the user.
