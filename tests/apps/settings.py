@@ -11,6 +11,7 @@ DJANGO_SQLALCHEMY_ECHO = True
 INSTALLED_APPS = (
     'django_sqlalchemy',
     'apps.blog',
+    'django.contrib.auth',
     'apps.news',
     'apps.norelations',
     'apps.categories',

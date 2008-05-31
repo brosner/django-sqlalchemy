@@ -27,9 +27,6 @@ class DSField(models.Field):
         return self.sa_column
         
     def sa_column_type(self):
-        import pdb
-        pdb.set_trace()
-        
         raise NotImplementedError
     
     def sa_column_args(self):
@@ -78,16 +75,17 @@ class DSDateField(models.Field, DSField):
                                         auto_now_add=auto_now_add, **kwargs)
     
     def sa_column_kwargs(self):
+        # TODO: can't handle init in inherited classes
         # need to handle auto_now and auto_now_add
-        kwargs = dict(onupdate=self.onupdate)
+        # kwargs = dict(onupdate=self.onupdate)
         base = super(DSDateField, self).sa_column_kwargs()
-        base.update(kwargs)
+        # base.update(kwargs)
         return base
     
     def sa_column_type(self):
         return Date()
 
-class DSDateTimeField(models.DateField, DSDateField):
+class DSDateTimeField(DSDateField):
     __metaclass__ = utils.ClassReplacer(models.DateTimeField)
 
     def sa_column_type(self):
