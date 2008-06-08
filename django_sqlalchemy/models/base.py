@@ -10,7 +10,7 @@ from sqlalchemy.orm.properties import PropertyLoader, ColumnProperty
 from sqlalchemy import util, exceptions
 from sqlalchemy.sql import util as sql_util
 
-from django_sqlalchemy.backend import metadata, Session
+from django_sqlalchemy.backend import metadata, session
 from django_sqlalchemy.models import *
 
 import types
@@ -24,16 +24,16 @@ def add_django_sqlalchemy_overrides(cls):
         Save the current instance. We force a flush so it mimics Django's 
         behavior.
         """
-        obj = Session.add(self)
-        Session.commit()
+        obj = session.add(self)
+        session.commit()
         return obj
     
     def delete(self):
         """
         Deletes the current instance
         """
-        obj = Session.delete(self)
-        Session.commit()
+        obj = session.delete(self)
+        session.commit()
         return obj
     setattr(cls, 'save', save)
     setattr(cls, 'delete', delete)
@@ -164,7 +164,7 @@ def _as_declarative(cls, classname, dict_):
 
     cls.__mapper__ = mapper_cls(cls, table, properties=our_stuff,
                                 **mapper_args)
-    cls.query = Session.query_property()
+    cls.query = session.query_property()
 
 # class DjangoSQLAlchemyModel(object):
 #     def __init__(self, *args, **kwargs):
@@ -178,16 +178,16 @@ def _as_declarative(cls, classname, dict_):
 #         Save the current instance. We force a flush so it mimics Django's 
 #         behavior.
 #         """
-#         obj = Session.add(self)
-#         Session.commit()
+#         obj = session.add(self)
+#         session.commit()
 #         return obj
 #     
 #     def delete(self):
 #         """
 #         Deletes the current instance
 #         """
-#         obj = Session.delete(self)
-#         Session.commit()
+#         obj = session.delete(self)
+#         session.commit()
 #         return obj
 # 
 # from django_sqlalchemy.utils import MixIn

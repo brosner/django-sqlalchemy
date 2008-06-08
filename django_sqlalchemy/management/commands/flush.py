@@ -49,11 +49,11 @@ Are you sure you want to do this?
                 # TODO: Original django code flushes by deleting rows from 
                 # each table and reseting sequences back to zero.  This 
                 # doesn't reset sequences.
-                from django_sqlalchemy.backend import metadata, Session
+                from django_sqlalchemy.backend import metadata, session
                 for app in models.get_apps():
                     for table in sql._get_tables_for_app(app):
-                        Session.execute(table.delete())
-                Session.commit()
+                        session.execute(table.delete())
+                session.commit()
             except Exception, e:
                 # transaction.rollback_unless_managed()
                 raise CommandError("""Database %s couldn't be flushed. Possible reasons:

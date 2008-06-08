@@ -1,14 +1,14 @@
 from django.db.models.loading import get_models
 from sqlalchemy import create_engine
-from django_sqlalchemy.backend import metadata, Session
+from django_sqlalchemy.backend import metadata, session
 
 def reset(engine, app):
     metadata.drop_all(engine, tables=_get_tables_for_app(app))
-    Session.commit()
+    session.commit()
 
 def create(engine, app):
     metadata.create_all(engine, tables=_get_tables_for_app(app))
-    Session.commit()
+    session.commit()
 
 def _get_tables_for_app(app):
     tables = []

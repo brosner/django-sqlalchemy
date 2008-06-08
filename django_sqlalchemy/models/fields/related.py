@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models.fields import NOT_PROVIDED
-from django_sqlalchemy.backend import metadata, Session
+from django_sqlalchemy.backend import metadata, session
 from django_sqlalchemy.models import DSField
 from django_sqlalchemy.models.related import WrappedDynaLoader
 from django_sqlalchemy import utils
@@ -135,7 +135,7 @@ class DSManyToManyField(models.ManyToManyField, DSField):
 
     def add(self, *args, **kwargs):
         self._original.add(self, *args, **kwargs)
-        Session.commit()
+        session.commit()
     
     def create_column(self):
         # m2m fields do not have a column

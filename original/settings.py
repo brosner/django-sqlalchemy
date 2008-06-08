@@ -74,5 +74,6 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     'original.foo',
+    'django.contrib.auth',
     # 'original.bar',
 )

@@ -102,14 +102,14 @@ class SQLAlchemyQuerySet(QuerySet):
         defaults = kwargs.pop('defaults', {})
         try:
             return self.get(**kwargs), False
-        except exceptions.InvalidRequestError:
+        except self.model.DoesNotExist:
             try:
                 params = dict([(k, v) for k, v in kwargs.items() if '__' not in k])
                 params.update(defaults)
                 obj = self.model(**params)
                 obj.save()
                 return obj, True
-            except exceptions.InvalidRequestError:
+            except IntegrityError, e:
                 return self.get(**kwargs), False
 
     def latest(self, field_name=None):

@@ -53,6 +53,11 @@ to test different areas of functionality.
   apps that require testing this functionality without anything else more 
   complicated included should use this app.
 
+* **events** - This is a basic event app with ``VenueInfo`` and ``Event`` 
+  models.  There is a ``ForeignKey`` between ``Event`` and ``VenueInfo``.
+  This app specifically uses ``VenueInfo`` to test foreign keys where the
+  join name does not necessarily match up to the ``ForeignKey`` field.
+
 * **categories** - The categories application contains a single 
   ``Category`` model that has an adjacency list (self-referntial) 
   relationship.  It also contains a custom manager that overrides the 

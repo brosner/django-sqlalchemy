@@ -1,5 +1,4 @@
 from optparse import make_option
-from django.core.management import call_command
 from django.core.management.base import NoArgsCommand
 
 class Command(NoArgsCommand):
@@ -11,12 +10,24 @@ class Command(NoArgsCommand):
             help='Tells Django to NOT prompt the user for input of any kind.'),
     )
     help = "Create the database tables for all apps in INSTALLED_APPS whose tables haven't already been created."
-    
+
     def handle_noargs(self, **options):
-        from django_sqlalchemy.backend import metadata, Session
+        from django_sqlalchemy.backend import metadata, session
+        from django.core.management import call_command
+        from django.core.management.sql import emit_post_sync_signal
+
+        # TODO: create after_create listeners for all tables, capture
+        # who got created and then use that in a post sync signal
+
         metadata.create_all()
-        Session.commit()
-        # load fixtures
+        session.commit()
+
         verbosity = int(options.get('verbosity', 1))
+        interactive = options.get('interactive')
+
+        # Send the post_syncdb signal, so individual apps can do whatever they need
+        # to do at this point.
+        # emit_post_sync_signal(created_models, verbosity, interactive)
+
+        # load fixtures
         call_command('loaddata', 'initial_data', verbosity=verbosity)
-        
