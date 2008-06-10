@@ -12,7 +12,7 @@ INSTALLED_APPS = (
     'django_sqlalchemy',
     # 'apps.blog',
     'apps.events',
-    # 'django.contrib.auth',
+    'django.contrib.auth',
     # 'apps.news',
     # 'apps.norelations',
     # 'apps.categories',

@@ -1,5 +1,7 @@
 from optparse import make_option
+from django.conf import settings
 from django.core.management.base import NoArgsCommand
+from django_sqlalchemy.utils import CreationSniffer
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
@@ -16,8 +18,19 @@ class Command(NoArgsCommand):
         from django.core.management import call_command
         from django.core.management.sql import emit_post_sync_signal
 
-        # TODO: create after_create listeners for all tables, capture
-        # who got created and then use that in a post sync signal
+        # Import the 'management' module within each installed app, to register
+        # dispatcher events.
+        for app_name in settings.INSTALLED_APPS:
+            try:
+                __import__(app_name + '.management', {}, {}, [''])
+            except ImportError, exc:
+                if not exc.args[0].startswith('No module named management'):
+                    raise
+
+        # set up table listeners
+        sniffer = CreationSniffer()
+        for table in metadata.tables.values(): 
+            table.append_ddl_listener('after-create', sniffer) 
 
         metadata.create_all()
         session.commit()
@@ -27,7 +40,7 @@ class Command(NoArgsCommand):
 
         # Send the post_syncdb signal, so individual apps can do whatever they need
         # to do at this point.
-        # emit_post_sync_signal(created_models, verbosity, interactive)
+        emit_post_sync_signal(sniffer.models, verbosity, interactive)
 
         # load fixtures
         call_command('loaddata', 'initial_data', verbosity=verbosity)

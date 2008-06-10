@@ -1,7 +1,20 @@
 import types
 from django.conf import settings
+from django.core.management.sql import installed_models
 
-__all__ = 'parse_db_uri', 'db_url', 'db_label'
+__all__ = 'parse_db_uri', 'db_url', 'db_label', 'CreationSniffer'
+
+class CreationSniffer(object): 
+    def __init__(self): 
+        self.tables = set() 
+
+    def __call__(self, event, table, bind): 
+        self.tables.add(table)
+
+    @property
+    def models(self):
+        return installed_models([table.name for table in self.tables]) 
+
 
 def parse_db_uri():
     """
@@ -12,12 +25,14 @@ def parse_db_uri():
     return (db_url, db_label)
 db_url, db_label = parse_db_uri()
 
+
 def unbound_method_to_callable(func_or_cls):
     """Adjust the incoming callable such that a 'self' argument is not required."""
     if isinstance(func_or_cls, types.MethodType) and not func_or_cls.im_self:
         return func_or_cls.im_func
     else:
         return func_or_cls
+
 
 def MixIn(klass, mixin, include_private=True, ancestor=False):
     if ancestor:
@@ -40,8 +55,10 @@ def MixIn(klass, mixin, include_private=True, ancestor=False):
                     member = member.im_func
                 setattr(klass, name, member)
 
+
 class MethodContainer(object):
     pass
+
 
 class ClassReplacer(object):    
     def __init__(self, klass, metaclass=None):
