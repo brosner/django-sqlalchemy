@@ -1,10 +1,15 @@
 import datetime
 from django.db import models
 
+class Owner(models.Model):
+    name = models.CharField(max_length=100)
+    phone = models.PhoneNumberField(null=True)
+
 class VenueInfo(models.Model):
     name = models.CharField(max_length=100)
+    owner = models.ForeignKey(Owner, unique=True)
     address = models.CharField(max_length=200)
-    phone = models.PhoneNumberField(blank=True)
+    phone = models.PhoneNumberField(null=True)
 
 class Event(models.Model):
     name = models.CharField(max_length=100)

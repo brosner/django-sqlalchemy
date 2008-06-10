@@ -1,7 +1,7 @@
 from django_sqlalchemy.test import *
 from django_sqlalchemy.backend import session
 from apps.blog.models import Category, Post
-from apps.events.models import VenueInfo, Event
+from apps.events.models import Owner, VenueInfo, Event
 
 class TestOneToMany(object):
     def setup(self):
@@ -19,8 +19,12 @@ class TestOneToMany(object):
             {'body': 'Intermediate Models - Will they ever happen?', 'category_id': c.id})
 
         session.add_all([
-            VenueInfo(name='Rock and Roll Palace', address='123 Main St.', phone='408-123-4567'), 
-            VenueInfo(name='The Big and Mighty', address='555 Fifth Third St.', phone='502-555-1212')])
+            Owner(name='Luiji Roscoe', phone='557-895-9687'), 
+            Owner(name='Jeffrey Gross-Bach')])
+
+        session.add_all([
+            VenueInfo(name='Rock and Roll Palace', address='123 Main St.', phone='408-123-4567', owner=Owner.query.get(1)), 
+            VenueInfo(name='The Big and Mighty', address='555 Fifth Third St.', phone='502-555-1212', owner=Owner.query.get(2))])
 
         v = VenueInfo.query.filter_by(name='Rock and Roll Palace').one()
         session.add_all([
@@ -58,3 +62,7 @@ class TestOneToMany(object):
     def test_should_query_across_related_item_with_different_naming(self):
         e = Event.objects.filter(venue_info__pk=2)
         assert_equal(2, e.count())
+
+    # def test_should_query_across_multiple_related_items(self):
+    #     e = Event.objects.filter(venue_info__owner__name='Luiji Roscoe')
+    #     assert_equal(3, e.count())
