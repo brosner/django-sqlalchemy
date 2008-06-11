@@ -20,5 +20,5 @@ from django.db.models import Manager
 
 def _patch():
     """Patch Django's internals."""
-    MixIn(Manager, DjangoSQLAlchemyManager)
+    MixIn(Manager, DjangoSQLAlchemyManager, include_private=False)
 _patch()
