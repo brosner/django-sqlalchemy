@@ -15,7 +15,7 @@ INSTALLED_APPS = (
     'apps.news',
     'apps.norelations',
     'apps.categories',
-    # 'django.contrib.auth',
+    'django.contrib.auth',
     )
 
 TEMPLATE_LOADERS = (
