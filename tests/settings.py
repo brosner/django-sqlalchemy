@@ -1,3 +1,5 @@
+import os
+
 SITE_ID = 1
 USE_I18N = True
 
@@ -27,3 +29,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
 )
+
+TEMPLATE_DIRS = [
+    os.path.join(os.path.dirname(__file__), "templates"),
+]
