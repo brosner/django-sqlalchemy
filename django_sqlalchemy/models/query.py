@@ -369,6 +369,7 @@ class SQLAlchemyQuerySet(QuerySet):
 
 class SQLAlchemyValuesQuerySet(QuerySet):
     def __init__(self, *args, **kwargs):
+        self.field_names = None
         super(SQLAlchemyValuesQuerySet, self).__init__(*args, **kwargs)
 
     def __repr__(self):
@@ -389,14 +390,12 @@ class SQLAlchemyValuesQuerySet(QuerySet):
         instance.
         """
         if self._fields:
-            # do something here to get around SA _values limitation
-            field_names = list(self._fields) + (self.field_names or [])
-            # field_names = [c.column for c in self.query._entities if isinstance(c, _ColumnEntity)] + list(self._fields) 
+            field_names = utils.fields_to_sa_columns(list(self._fields) + self.field_names)            
         else:
             # Default to all fields.
-            field_names = [f.attname for f in self.model._meta.fields]
+            field_names = [attr for attr in attributes.manager_of_class(Category).attributes]
 
-        self.query = self.query._values(*field_names)
+        self.query = self.query.values(*field_names)
         self.field_names = field_names
 
 class SQLAlchemyValuesListQuerySet(SQLAlchemyValuesQuerySet):

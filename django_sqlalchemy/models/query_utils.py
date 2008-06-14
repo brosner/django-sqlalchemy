@@ -75,6 +75,27 @@ def _lookup_query_expression(lookup_type, field, value):
             return curry(operator.ne, field, None)
     else:
         return None
+
+def parse_joins(queryset, arg):
+    if not isinstance(arg, list):
+        parts = arg.split(LOOKUP_SEP)
+        if not parts:
+            raise FieldError("Cannot parse keyword query %r" % arg)
+    else:
+        parts = arg
+
+    model = queryset.model
+    field = parts[-1]
+
+    if len(parts) > 1:
+        # break out the relationships from the lookup field
+        fks = parts[0:-1]
+
+        for f in fks:
+            related_model = model._meta.get_field(f).rel.to
+            queryset.query = queryset.query.join(related_model._meta.object_name.lower())
+            model = related_model
+    return (queryset, [model, field])
         
 def lookup_attname(meta, value):
     """
@@ -96,15 +117,12 @@ def parse_filter(queryset, exclude, **kwargs):
     automatically trim the final join group (used internally when
     constructing nested queries).
     """
-    
     query = queryset._clone()
-    
+
     for filter_expr in [(k, v) for k, v in kwargs.items()]:
         arg, value = filter_expr
         parts = arg.split(LOOKUP_SEP)
-        if not parts:
-            raise FieldError("Cannot parse keyword query %r" % arg)
-    
+        
         # Work out the lookup type and remove it from 'parts', if necessary.
         if len(parts) == 1 or parts[-1] not in QUERY_TERMS:
             lookup_type = 'exact'
@@ -114,23 +132,9 @@ def parse_filter(queryset, exclude, **kwargs):
         if callable(value):
             value = value()
         
-        # handle joins
-        if len(parts) > 1:
-            # break out the relationships from the lookup field
-            fks = parts[0:-1]
-            field = parts[-1]
+        # parse and create the joins
+        query, parts = parse_joins(queryset, parts)
 
-            # add in the joins
-            model = queryset.model
-            for f in fks:
-                related_model = model._meta.get_field(f).rel.to
-                query.query = query.query.join(related_model._meta.object_name.lower())
-                model = related_model
-            # add in the parts which is always related to the last join point
-            parts = [model, field]
-        else:
-            parts = [queryset.model] + parts
-        
         field = reduce(lambda x, y: getattr(x, lookup_attname(parts[0]._meta, y)), parts)
         op = _lookup_query_expression(lookup_type, field, value)
         expression = op()
@@ -169,8 +173,27 @@ def parse_order_by(queryset, *field_names):
             queryset.query = queryset.query.order_by(order(condition))
         else:
             # normal order by
-            #TODO: handle the join situation
-            parts = [queryset.model] + field.split(LOOKUP_SEP)            
-            condition = reduce(lambda x, y: getattr(x, y), parts)        
+            queryset, parts = parse_joins(queryset, field)
+            condition = reduce(lambda x, y: getattr(x, y), parts)
             queryset.query = queryset.query.order_by(order(condition))
     return queryset
+
+# def fields_to_sa_columns(model, *field_names):
+#     sa = []
+#     
+#     for field_name in fields_names:
+#         parts = field_name.split(LOOKUP_SEP)
+#         
+#         if len(parts) > 1:
+#             # break out the relationships from the lookup field
+#             fks = parts[0:-1]
+#             field = parts[-1]
+# 
+#             for f in fks:
+#                 related_model = model._meta.get_field(f).rel.to
+#                 sa.append(getattr(related_model, field))
+#                 model = related_model
+#         else:
+#             sa.append(getattr(model, field_name))
+# 
+#     return sa

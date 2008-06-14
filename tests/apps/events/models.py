@@ -7,7 +7,7 @@ class Owner(models.Model):
 
 class VenueInfo(models.Model):
     name = models.CharField(max_length=100)
-    owner = models.ForeignKey(Owner, unique=True)
+    owner = models.ForeignKey(Owner)
     address = models.CharField(max_length=200)
     phone = models.PhoneNumberField(null=True)
 
