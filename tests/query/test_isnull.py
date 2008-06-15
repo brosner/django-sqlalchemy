@@ -1,13 +1,13 @@
 from django_sqlalchemy.test import *
 from apps.categories.models import Category
 
-class TestIsNull(object):
-    """
-    The models we are using in this test is a self referential category model.
-    Also it contains a custom manager that overrides the default get_query_set
-    to only return active items.
-    """
-    
+"""
+The models we are using in this test is a self referential category model.
+Also it contains a custom manager that overrides the default get_query_set
+to only return active items.
+"""
+
+class TestIsNull(object):    
     def setup(self):
         Category.__table__.insert().execute(
             {'name': 'Python', 'slug': 'python', 'description': 'We got your whitespace.'}, 
