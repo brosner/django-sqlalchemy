@@ -2,7 +2,9 @@
 from django.db.models.query import QuerySet
 from django.db.models.sql.constants import ORDER_PATTERN
 
+from sqlalchemy.orm import attributes
 from sqlalchemy.orm.query import _ColumnEntity
+from sqlalchemy.sql import operators
 
 from django_sqlalchemy.models import query_utils as utils
 
@@ -34,6 +36,7 @@ class SQLAlchemyQuerySet(QuerySet):
         return self.iterator()
     
     def __getitem__(self, k):
+        # TODO: with 0.5 SA executes this immediately, Django doesn't
         return self.query.__getitem__(k)
 
     ####################################
@@ -369,7 +372,7 @@ class SQLAlchemyQuerySet(QuerySet):
 
 class SQLAlchemyValuesQuerySet(QuerySet):
     def __init__(self, *args, **kwargs):
-        self.field_names = None
+        self.field_names = []
         super(SQLAlchemyValuesQuerySet, self).__init__(*args, **kwargs)
 
     def __repr__(self):
@@ -390,13 +393,13 @@ class SQLAlchemyValuesQuerySet(QuerySet):
         instance.
         """
         if self._fields:
-            field_names = utils.fields_to_sa_columns(list(self._fields) + self.field_names)            
+            self.field_names = list(self._fields) + self.field_names            
         else:
             # Default to all fields.
-            field_names = [attr for attr in attributes.manager_of_class(Category).attributes]
+            self.field_names = [f.attname for f in self.model._meta.fields]
 
+        field_names = utils.fields_to_sa_columns(self, *self.field_names)
         self.query = self.query.values(*field_names)
-        self.field_names = field_names
 
 class SQLAlchemyValuesListQuerySet(SQLAlchemyValuesQuerySet):
     def iterator(self):

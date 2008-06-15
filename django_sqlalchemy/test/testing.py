@@ -1,3 +1,4 @@
+from django.conf import settings
 from django_sqlalchemy import utils
 from django_sqlalchemy.test.compat import *    
 
@@ -90,5 +91,19 @@ def unsupported(*dbs):
                 return True
             else:
                 return fn(*args, **kw)
+        return _function_named(maybe, fn_name)
+    return decorate
+
+def requires(app_label):
+    """Mark a test as expected to fail for the app specified if the app
+    is not included in INSTALLED_APPS.
+    """
+    def decorate(fn):
+        fn_name = fn.__name__
+        def maybe(*args, **kw):
+            for app_name in settings.INSTALLED_APPS:
+                if app_label == app_name.split('.')[-1]:
+                    return fn(*args, **kw)
+            return True
         return _function_named(maybe, fn_name)
     return decorate

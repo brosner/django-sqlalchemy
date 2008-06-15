@@ -5,7 +5,7 @@ from nose.tools import *
 
 __all__ = ['assert_instance_of', 'assert_not_instance_of', 
            'assert_none', 'assert_not_none',
-           'assert_list_same', 'assert_in'] + tools.__all__
+           'assert_list_same', 'assert_contains'] + tools.__all__
 
 def assert_instance_of(expected, actual, msg=None):
     """Verify that object is an instance of expected """
@@ -28,6 +28,6 @@ def assert_list_same(expected, actual, msg=None):
     assert_equal([repr(e) for e in expected],
                  [repr(a) for a in actual])
 
-def assert_in(expected, actual, msg=None):
+def assert_contains(expected, actual, msg=None):
     """verify that the expected is in the actual"""
     assert expected in actual

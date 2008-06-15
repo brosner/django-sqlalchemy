@@ -178,22 +178,12 @@ def parse_order_by(queryset, *field_names):
             queryset.query = queryset.query.order_by(order(condition))
     return queryset
 
-# def fields_to_sa_columns(model, *field_names):
-#     sa = []
-#     
-#     for field_name in fields_names:
-#         parts = field_name.split(LOOKUP_SEP)
-#         
-#         if len(parts) > 1:
-#             # break out the relationships from the lookup field
-#             fks = parts[0:-1]
-#             field = parts[-1]
-# 
-#             for f in fks:
-#                 related_model = model._meta.get_field(f).rel.to
-#                 sa.append(getattr(related_model, field))
-#                 model = related_model
-#         else:
-#             sa.append(getattr(model, field_name))
-# 
-#     return sa
+def fields_to_sa_columns(queryset, *field_names):
+    sa = []
+    
+    for field_name in field_names:
+        queryset, parts = parse_joins(queryset, field_name)
+        condition = reduce(lambda x, y: getattr(x, y), parts)
+        sa.append(condition)
+
+    return sa
