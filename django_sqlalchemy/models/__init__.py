@@ -11,13 +11,12 @@ from django_sqlalchemy.backend import metadata
 __all__ = ['DSField', 'DSAutoField', 'DSCharField', 'DSPhoneNumberField'] + \
            sqlalchemy.types.__all__
 
-from django.dispatch import dispatcher
 from django.db.models import signals
 
 reg = {}
 
-def instrument_models(sender):
+def instrument_models(sender, **kwargs):
     instrument_declarative(sender, reg, metadata)
     add_django_sqlalchemy_overrides(sender)
 
-dispatcher.connect(instrument_models, signal=signals.class_prepared)
+signals.class_prepared.connect(instrument_models)

@@ -1,6 +1,5 @@
 import types
 from django.conf import settings
-from django.core.management.sql import installed_models
 
 __all__ = 'parse_db_uri', 'db_url', 'db_label', 'CreationSniffer'
 
@@ -13,7 +12,8 @@ class CreationSniffer(object):
 
     @property
     def models(self):
-        return installed_models([table.name for table in self.tables]) 
+        from django.db import connection
+        return connection.introspection.installed_models([table.name for table in self.tables]) 
 
 
 def parse_db_uri():

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseOperations, util
+from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseOperations, BaseDatabaseValidation, util
+
 from django_sqlalchemy import utils
 
 try:
@@ -35,9 +36,17 @@ class DatabaseOperations(BaseDatabaseOperations):
         return metadata.bind.dialect.identifier_preparer.quote_identifier(name)
 
 class DatabaseWrapper(BaseDatabaseWrapper):
-    features = DatabaseFeatures()
-    ops = DatabaseOperations()
-    
+    def __init__(self, *args, **kwargs):
+        super(DatabaseWrapper, self).__init__(*args, **kwargs)
+
+        self.features = DatabaseFeatures()
+        self.ops = DatabaseOperations()
+        #self.client = DatabaseClient()
+        #self.creation = DatabaseCreation(self)
+        from django_sqlalchemy.backend.introspection import DatabaseIntrospection
+        self.introspection = DatabaseIntrospection(self)
+        self.validation = BaseDatabaseValidation()
+   
     def _cursor(self, settings):
         from sqlalchemy.databases.sqlite import SQLiteDialect
         conn = session.connection()

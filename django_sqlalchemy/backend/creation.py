@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.db.backends.creation import BaseDatabaseCreation
 
-DATA_TYPES = {
-}
+class DatabaseCreation(BaseDatabaseCreation):
+    data_types = {
+    }

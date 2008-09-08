@@ -111,15 +111,15 @@ class DSDecimalField(models.Field, DSField):
 class DSEmailField(models.CharField, DSCharField):
     __metaclass__ = utils.ClassReplacer(models.EmailField)
     
-class DSFileField(models.Field, DSField):
-    __metaclass__ = utils.ClassReplacer(models.FileField)
+#class DSFileField(models.Field, DSField):
+    #__metaclass__ = utils.ClassReplacer(models.FileField)
 
-    def __init__(self, *args, **kwargs):
-        self._original.FileField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
-                                        name=kwargs.get('name', None), 
-                                        upload_to=kwargs.get('upload_to', ''), **kwargs)    
-    def sa_column_type(self):
-        return String(length=self.max_length)
+    #def __init__(self, *args, **kwargs):
+        #self._original.FileField.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
+                                        #name=kwargs.get('name', None), 
+                                        #upload_to=kwargs.get('upload_to', ''), **kwargs)    
+    #def sa_column_type(self):
+        #return String(length=self.max_length)
 
 class DSFilePathField(models.Field, DSField):
     __metaclass__ = utils.ClassReplacer(models.FilePathField)
@@ -140,14 +140,14 @@ class DSFloatField(models.Field, DSField):
     def sa_column_type(self):
         return Float()
 
-class DSImageField(models.FileField, DSFileField):
-    __metaclass__ = utils.ClassReplacer(models.ImageField)
+#class DSImageField(models.FileField, DSFileField):
+    #__metaclass__ = utils.ClassReplacer(models.ImageField)
 
-    # def __init__(self, *args, **kwargs):
-    #     self._original.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
-    #                                     name=kwargs.get('name', None), 
-    #                                     width_field=kwargs.get('width_field', ''), 
-    #                                     height_field=kwargs.get('height_field', None), **kwargs)
+    ## def __init__(self, *args, **kwargs):
+    ##     self._original.__init__(self, verbose_name=kwargs.get('verbose_name', None), 
+    ##                                     name=kwargs.get('name', None), 
+    ##                                     width_field=kwargs.get('width_field', ''), 
+    ##                                     height_field=kwargs.get('height_field', None), **kwargs)
 
 class DSIntegerField(models.Field, DSField):
     __metaclass__ = utils.ClassReplacer(models.IntegerField)
@@ -244,8 +244,3 @@ class DSXMLField(models.TextField, DSTextField):
     #                                    name=kwargs.get('name', None), 
     #                                    schema_path=kwargs.get('schema_path', None), **kwargs)
 
-class DSOrderingField(models.IntegerField, DSIntegerField):
-    __metaclass__ = utils.ClassReplacer(models.OrderingField)
-
-    def sa_column_type(self):
-        return Integer()
