@@ -311,24 +311,15 @@ class SQLAlchemyQuerySet(QuerySet):
         return clone
 
     def extra(self, select=None, where=None, params=None, tables=None,
-            order_by=None):
+              order_by=None, select_params=None):
         """
-        TODO:need to map extra
-        Add extra SQL fragments to the query.
+        TODO: Need to Map extra()
+        Adds extra SQL fragments to the query.
         """
-        assert self.query.can_filter(), \
-                "Cannot change a query once a slice has been taken"
+        #assert self.query.can_filter(), \
+                #"Cannot change a query once a slice has been taken"
         clone = self._clone()
-        if select:
-            clone.query.extra_select.update(select)
-        if where:
-            clone.query.extra_where.extend(where)
-        if params:
-            clone.query.extra_params.extend(params)
-        if tables:
-            clone.query.extra_tables.extend(tables)
-        if order_by:
-            clone.query.extra_order_by = order_by
+        #clone.query.add_extra(select, select_params, where, params, tables, order_by)
         return clone
 
     def reverse(self):

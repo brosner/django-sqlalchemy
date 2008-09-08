@@ -17,6 +17,6 @@ reg = {}
 
 def instrument_models(sender, **kwargs):
     instrument_declarative(sender, reg, metadata)
-    add_django_sqlalchemy_overrides(sender)
+    #add_django_sqlalchemy_overrides(sender)
 
 signals.class_prepared.connect(instrument_models)

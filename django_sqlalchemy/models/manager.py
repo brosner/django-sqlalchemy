@@ -15,6 +15,14 @@ class DjangoSQLAlchemyManager(object):
     def options(self, *args):
         return self.get_query_set().options(*args)
 
+    def _insert(self, values, **kwargs):
+        """ TODO: I think we can implement this by passing it to SA directly. """
+        return True
+    
+    def _update(self, values, **kwargs):
+        """ TODO: I think we can implement this by passing it to SA directly. """
+        return True
+
 from django_sqlalchemy.utils import MixIn
 from django.db.models import Manager
 
