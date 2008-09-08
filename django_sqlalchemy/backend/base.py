@@ -39,6 +39,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
+        self.metadata = metadata
         self.features = DatabaseFeatures()
         self.ops = DatabaseOperations()
         #self.client = DatabaseClient()

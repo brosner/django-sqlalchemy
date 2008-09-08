@@ -13,12 +13,11 @@ class Command(NoArgsCommand):
             raise CommandError("Database inspection isn't supported for the currently selected database backend.")
 
     def handle_inspection(self):
-        from django.db import connection, get_introspection_module
+        from django.db import connection
         from django_sqlalchemy.backend import metadata
         from sqlalchemy import Table, logging
         import keyword
 
-        introspection_module = get_introspection_module()
         # TODO: remove this once logging is turned off globally
         metadata.bind.echo = False
         metadata.reflect()
@@ -37,19 +36,19 @@ class Command(NoArgsCommand):
         yield ''
         yield 'from django.db import models'
         yield ''
-        for table_name in introspection_module.get_table_list(cursor):
+        for table_name in connection.introspection.get_table_list(cursor):
             table = metadata.tables[table_name]
             
             yield 'class %s(models.Model):' % table2model(table_name)
             try:
-                relations = introspection_module.get_relations(cursor, table_name)
+                relations = connection.introspection.get_relations(cursor, table_name)
             except NotImplementedError:
                 relations = {}
             try:
-                indexes = introspection_module.get_indexes(cursor, table_name)
+                indexes = connection.introspection.get_indexes(cursor, table_name)
             except NotImplementedError:
                 indexes = {}
-            for i, row in enumerate(introspection_module.get_table_description(cursor, table_name)):
+            for i, row in enumerate(connection.introspection.get_table_description(cursor, table_name)):
                 att_name = row[0].lower()
                 comment_notes = [] # Holds Field notes, to be displayed in a Python comment.
                 extra_params = {}  # Holds Field parameters such as 'db_column'.
@@ -77,8 +76,8 @@ class Command(NoArgsCommand):
                     field_type = None
                         
                     for column_type in bases:
-                        if introspection_module.DATA_TYPES_REVERSE.has_key(column_type):
-                            field_type = introspection_module.DATA_TYPES_REVERSE[column_type]
+                        if connection.introspection.data_types_reverse.has_key(column_type):
+                            field_type = connection.introspection.data_types_reverse[column_type]
                             break
                         
                     if field_type is None:    

@@ -1,12 +1,12 @@
 from django_sqlalchemy.test import *
 from django_sqlalchemy.backend import metadata
-from django.db import get_introspection_module, connection
+from django.db import connection
 from apps.blog.models import Category
 from apps.news.models import Article
 
 class TestIntrospection(object):
     def setup(self):
-        self.im = get_introspection_module()
+        self.im = connection.introspection
         self.cursor = connection.cursor()
         
     def test_should_get_table_list(self):
