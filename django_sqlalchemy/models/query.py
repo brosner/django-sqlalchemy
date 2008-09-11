@@ -37,7 +37,7 @@ class SQLAlchemyQuerySet(QuerySet):
     
     def __getitem__(self, k):
         # TODO: with 0.5 SA executes this immediately, Django doesn't
-        return self.query.__getitem__(k)
+        return list(self.query)[k]
 
     ####################################
     # METHODS THAT DO DATABASE QUERIES #
@@ -361,18 +361,16 @@ class SQLAlchemyQuerySet(QuerySet):
         return c
 
 
-class SQLAlchemyValuesQuerySet(QuerySet):
+class SQLAlchemyValuesQuerySet(SQLAlchemyQuerySet):
     def __init__(self, *args, **kwargs):
         self.field_names = []
         super(SQLAlchemyValuesQuerySet, self).__init__(*args, **kwargs)
 
     def __repr__(self):
-        #FIXME: this causes a count query because of the dumb implementation
-        # of len
         return repr(list(self))
 
     def iterator(self):
-        for row in iter(self.query):
+        for row in self.query:
             yield dict(zip(self.field_names, row))
 
     def _setup_query(self):
@@ -384,7 +382,7 @@ class SQLAlchemyValuesQuerySet(QuerySet):
         instance.
         """
         if self._fields:
-            self.field_names = list(self._fields) + self.field_names            
+            self.field_names = list(self._fields) + self.field_names
         else:
             # Default to all fields.
             self.field_names = [f.attname for f in self.model._meta.fields]

@@ -167,17 +167,6 @@ class DSNullBooleanField(models.Field, DSField):
     def sa_column_type(self):
         return Boolean()
 
-class DSPhoneNumberField(models.IntegerField, DSIntegerField):
-    __metaclass__ = utils.ClassReplacer(models.PhoneNumberField)
-
-    def sa_column_type(self):
-        ''' This is a bit odd because in Django the PhoneNumberField descends
-            from an IntegerField in a hacky way of getting around not 
-            providing a max_length.  The database backends enforce the
-            length as a varchar(20).
-        '''
-        return String(length=20)
-
 class DSPositiveIntegerField(models.IntegerField, DSIntegerField):
     __metaclass__ = utils.ClassReplacer(models.PositiveIntegerField)
 
@@ -229,12 +218,6 @@ class DSURLField(models.CharField, DSCharField):
     #     self._original.__init__(self, verbose_name=kwargs.pop('verbose_name', None), 
     #                                    name=kwargs.pop('name', None), 
     #                                    verify_exists=kwargs.pop('verify_exists', True), **kwargs)
-
-class DSUSStateField(models.Field, DSField):
-    __metaclass__ = utils.ClassReplacer(models.USStateField)
-
-    def sa_column_type(self):
-        return String(length=2)
 
 class DSXMLField(models.TextField, DSTextField):
     __metaclass__ = utils.ClassReplacer(models.XMLField)
