@@ -1,6 +1,7 @@
 import operator
 
 from django.db.models.sql.constants import *
+from django.db import models
 from django.core.exceptions import FieldError
 from django.utils.functional import curry
 from sqlalchemy.sql import func, desc, asc
@@ -105,8 +106,11 @@ def lookup_attname(meta, value):
     if value == 'pk':
         return meta.pk.attname
     else:
-        field, model, direct, m2m = meta.get_field_by_name(value)
-        return field.attname
+        try:
+            field, model, direct, m2m = meta.get_field_by_name(value)
+            return field.attname
+        except models.FieldDoesNotExist:
+            return value
 
 def parse_filter(queryset, exclude, **kwargs):
     """
@@ -183,7 +187,7 @@ def fields_to_sa_columns(queryset, *field_names):
     
     for field_name in field_names:
         queryset, parts = parse_joins(queryset, field_name)
-        condition = reduce(lambda x, y: getattr(x, y), parts)
-        sa.append(condition)
+        field = reduce(lambda x, y: getattr(x, lookup_attname(parts[0]._meta, y)), parts)
+        sa.append(field)
 
     return sa

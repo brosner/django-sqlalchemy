@@ -45,10 +45,10 @@ class TestValues(object):
                       {'name': u'Jeffrey Gross-Bach', 'id': 2}, 
                       {'name': u'Luiji Rosso', 'id': 3}], list(Owner.objects.values('name', 'id')))
 
-    def test_should_return_values_of_foreign_key_item(self):
-        assert_equal([{'name': u'Luiji Roscoe', 'id': 1}, 
-                      {'name': u'Jeffrey Gross-Bach', 'id': 2}, 
-                      {'name': u'Luiji Rosso', 'id': 3}], list(VenueInfo.objects.values('owner')))
+    #def test_should_return_values_of_foreign_key_item(self):
+        #assert_equal([{'owner': 1}, 
+                      #{'owner': 2}, 
+                      #{'owner': 3}], list(VenueInfo.objects.values('owner')))
 
     def test_should_return_values_from_foreign_tables(self):
         pass
@@ -67,36 +67,3 @@ class TestValues(object):
         assert_equal([{'owner': 1}, {'owner': 2}, {'owner': 2}], 
                      list(VenueInfo.objects.values('owner')))
 
-
-"""
-# Create something with a duplicate 'name' so that we can test multi-column
-# cases (which require some tricky SQL transformations under the covers).
->>> xx = Item(name='four', created=time1, creator=a2, note=n1)
->>> xx.save()
->>> Item.objects.exclude(name='two').values('creator', 'name').distinct().count()
-4
->>> Item.objects.exclude(name='two').extra(select={'foo': '%s'}, select_params=(1,)).values('creator', 'name', 'foo').distinct().count()
-4
->>> Item.objects.exclude(name='two').extra(select={'foo': '%s'}, select_params=(1,)).values('creator', 'name').distinct().count()
-4
-
->>> qs = Ranking.objects.extra(select={'good': 'case when rank > 2 then 1 else 0 end'})
->>> [o.good for o in qs.extra(order_by=('-good',))] == [True, False, False]
-True
->>> qs.extra(order_by=('-good', 'id'))
-[<Ranking: 3: a1>, <Ranking: 2: a2>, <Ranking: 1: a3>]
-
-# Despite having some extra aliases in the query, we can still omit them in a
-# values() query.
->>> qs.values('id', 'rank').order_by('id')
-[{'id': 1, 'rank': 2}, {'id': 2, 'rank': 1}, {'id': 3, 'rank': 3}]
-
-Ordering columns must be included in the output columns. Note that this means
-results that might otherwise be distinct are not (if there are multiple values
-in the ordering cols), as in this example. This isn't a bug; it's a warning to
-be careful with the selection of ordering columns.
-
->>> Note.objects.values('misc').distinct().order_by('note', '-misc')
-[{'misc': u'foo'}, {'misc': u'bar'}, {'misc': u'foo'}]
-
-"""

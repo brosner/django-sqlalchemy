@@ -367,7 +367,7 @@ class SQLAlchemyValuesQuerySet(SQLAlchemyQuerySet):
         super(SQLAlchemyValuesQuerySet, self).__init__(*args, **kwargs)
 
     def __repr__(self):
-        return repr(list(self))
+        return repr([o for o in self.iterator()])
 
     def iterator(self):
         for row in self.query:
