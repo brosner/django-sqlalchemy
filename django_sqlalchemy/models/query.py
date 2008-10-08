@@ -7,6 +7,7 @@ from sqlalchemy.orm.query import _ColumnEntity
 from sqlalchemy.sql import operators
 
 from django_sqlalchemy.models import query_utils as utils
+from django.db.models.query_utils import Q
 
 class SQLAlchemyQuerySet(QuerySet):
     """

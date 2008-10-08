@@ -1,4 +1,5 @@
 import operator
+import datetime
 
 from django.db.models.sql.constants import *
 from django.db import models
@@ -14,8 +15,11 @@ def _get_range_lookup(lookup_type, field, value):
         except ValueError:
             raise ValueError("The __year lookup type requires an integer argument")
         if utils.db_label == 'sqlite':
-            first = '%s-01-01'
-            second = '%s-12-31 23:59:59.999999'
+            #first = '%s-01-01'
+            #second = '%s-12-31 23:59:59.999999'
+            first  = datetime.datetime(value, 1, 1)
+            second = datetime.datetime(value, 12, 31, 23, 59, 59, 999999)
+            return (first, second)
         elif utils.db_label == 'oracle': # and self.get_internal_type() == 'DateField':
             first = '%s-01-01'
             second = '%s-12-31'

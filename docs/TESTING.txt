@@ -29,7 +29,7 @@ Configuration
 
 To run tests just use::
 
-    nosetests --with-django-sqlalchemy --with-doctests --doctest-extention=test
+    nosetests --with-django-sqlalchemy --with-doctest --doctest-extension=test
 
 To make life easy, create the following in a ``.noserc`` or ``nose.cfg`` file
 in your home directory. It should contain contents like the following, 
