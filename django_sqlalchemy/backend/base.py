@@ -47,14 +47,14 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         from django_sqlalchemy.backend.introspection import DatabaseIntrospection
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation()
-   
+
     def _cursor(self, settings):
-        from sqlalchemy.databases.sqlite import SQLiteDialect
+        #from sqlalchemy.databases.sqlite import SQLiteDialect
         conn = session.connection()
         kwargs = {}
-        if isinstance(conn.engine.dialect, SQLiteDialect,):
-            from django.db.backends.sqlite3.base import SQLiteCursorWrapper
-            kwargs['factory'] = SQLiteCursorWrapper
+        #if isinstance(conn.engine.dialect, SQLiteDialect,):
+            #from django.db.backends.sqlite3.base import SQLiteCursorWrapper
+            #kwargs['factory'] = SQLiteCursorWrapper
         return conn.connection.cursor(**kwargs)
 
 def get_sqlalchemy_backend():
